@@ -9,72 +9,61 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #f4f6f9; color: #333; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* Üst Bar */
         .header { background-color: #ffcc00; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 10; }
         .header h1 { font-size: 22px; color: #121212; font-weight: 800; }
         .user-info { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: bold; }
         .logout-btn { background: #121212; color: white; border: none; padding: 5px 10px; border-radius: 5px; font-size: 12px; cursor: pointer; }
 
-        /* Ana İçerik */
         .content { flex: 1; padding: 20px; overflow-y: auto; padding-bottom: 80px; }
         .page-section { display: none; height: 100%; }
         .page-section.active { display: block; }
         
         .section-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #121212; }
         
-        /* Görev Kartları */
         .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .task-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; }
         .task-reward { display: inline-block; background: #e6f9f0; color: #00b359; padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; margin-bottom: 10px; }
         .task-btn { background: #121212; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         
-        /* Alt Menü */
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 10; }
-        .nav-item { text-align: center; color: #888; font-size: 12px; cursor: pointer; border: none; background: none; width: 25%; }
+        .nav-item { text-align: center; color: #888; font-size: 11px; cursor: pointer; border: none; background: none; width: 20%; }
         .nav-item.active { color: #ffcc00; font-weight: bold; }
         .nav-item i { display: block; font-size: 20px; margin-bottom: 5px; font-style: normal; }
 
-        /* GÖREV DETAY SAYFASI (Tam Ekran) */
-        #task-detail-page {
-            display: none; /* Başlangıçta gizli */
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #f4f6f9;
-            z-index: 2000;
-            flex-direction: column;
-            overflow-y: auto;
-        }
-        
+        /* GÖREV DETAY SAYFASI */
+        #task-detail-page { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f4f6f9; z-index: 2000; flex-direction: column; overflow-y: auto; }
         .detail-header { background: #121212; color: white; padding: 20px; display: flex; align-items: center; gap: 15px; }
         .back-btn { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
-        
         .detail-content { padding: 20px; }
         .detail-title { font-size: 22px; font-weight: bold; margin-bottom: 10px; color: #121212; }
         .detail-reward { background: #e6f9f0; color: #00b359; padding: 8px 15px; border-radius: 20px; font-weight: bold; display: inline-block; margin-bottom: 20px; }
-        
         .instruction-box { background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 4px solid #ffcc00; }
-        .instruction-box h3 { font-size: 16px; margin-bottom: 10px; color: #333; }
-        .instruction-box p { font-size: 14px; color: #555; line-height: 1.5; }
-        
         .task-link-btn { display: block; text-align: center; background: #4da6ff; color: white; text-decoration: none; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 16px; margin-bottom: 20px; }
-        
         .upload-area { background: white; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .upload-input { display: none; }
         .upload-label { display: block; padding: 40px 20px; border: 2px dashed #ccc; border-radius: 8px; cursor: pointer; color: #888; margin-bottom: 15px; }
-        .upload-label:hover { background: #f9f9f9; }
         #detail-image-preview { width: 100%; max-height: 250px; object-fit: contain; border-radius: 8px; display: none; margin-bottom: 15px; border: 1px solid #ddd; }
-        
         .submit-proof-btn { background: #00ff88; color: #121212; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
-        .submit-proof-btn:disabled { background: #ccc; cursor: not-allowed; }
 
-        /* Giriş Ekranı */
-        #login-area { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; padding: 20px; text-align: center; background: #f4f6f9; }
+        /* PROFİL SAYFASI EKSTRALARI */
+        .profile-info { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .profile-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .profile-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .copy-btn { background: #ffcc00; color: #121212; border: none; padding: 10px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
+        .danger-btn { background: #ff4444; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
+        .history-tabs { display: flex; gap: 5px; margin-bottom: 15px; }
+        .history-tab { flex: 1; text-align: center; padding: 10px; background: #ddd; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .history-tab.active { background: #121212; color: white; }
+        .history-item { background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-size: 14px; }
+        .status-bekliyor { color: #ffaa00; font-weight: bold; }
+        .status-onaylandi { color: #00b359; font-weight: bold; }
+        .status-reddedildi { color: #ff4444; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <!-- GİRİŞ EKRANI -->
-    <div id="login-area">
+    <div id="login-area" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; padding: 20px; text-align: center; background: #f4f6f9;">
         <h1 style="font-size: 40px; margin-bottom: 10px;">👑</h1>
         <h2 style="margin-bottom: 20px;">Nahyec'e Hoş Geldin!</h2>
         <p style="color: #666; margin-bottom: 30px;">Görevleri yap, NC kazan ve ödüllerini al.</p>
@@ -96,65 +85,93 @@
         </div>
 
         <div class="content">
-            <!-- GÖREVLER SEKMEsi -->
             <div id="tasks-tab" class="page-section active">
                 <div class="section-title">Yapılacak Görevler</div>
                 <div id="user-task-list"></div>
             </div>
 
-            <!-- ÇEKİLİŞLER SEKMEsi -->
             <div id="giveaways-tab" class="page-section">
                 <div class="section-title">🎁 Aktif Çekilişler</div>
                 <div id="user-giveaway-list"></div>
             </div>
 
-            <!-- MAĞAZA SEKMEsi -->
             <div id="store-tab" class="page-section">
                 <div class="section-title">Ödül Mağazası</div>
                 <div id="user-store-list"></div>
             </div>
 
-            <!-- ENVANTER SEKMESİ -->
             <div id="inventory-tab" class="page-section">
                 <div class="section-title">Envanterim</div>
                 <div id="user-inventory-list">
                     <p style="color: #666; text-align: center; margin-top: 20px;">Henüz bir kodun yok.</p>
                 </div>
             </div>
+
+            <!-- YENİ: PROFİL SEKMEsi -->
+            <div id="profile-tab" class="page-section">
+                <div class="section-title">👤 Profilim</div>
+                
+                <!-- Kullanıcı Bilgileri -->
+                <div class="profile-info">
+                    <div class="profile-row"><span>E-posta:</span> <b id="profile-email">-</b></div>
+                    <div class="profile-row"><span>Bakiye:</span> <b id="profile-balance" style="color:#00b359;">0 NC</b></div>
+                </div>
+
+                <!-- Davet Et Kazan -->
+                <div class="section-title" style="font-size:16px; margin-top:20px;">📢 Davet Et, Kazan!</div>
+                <div class="profile-info">
+                    <p style="font-size: 13px; color: #666; margin-bottom: 10px;">Bu linki arkadaşlarınla paylaş. Arkadaşın ilk görevini yapıp onaylandığında sen de NC kazan!</p>
+                    <input type="text" id="invite-link" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; background:#f9f9f9; margin-bottom:5px;" readonly>
+                    <button class="copy-btn" onclick="linkKopyala()">Linki Kopyala</button>
+                </div>
+
+                <!-- Geçmiş -->
+                <div class="section-title" style="font-size:16px; margin-top:20px;">📋 Görev Geçmişim</div>
+                <div class="history-tabs">
+                    <div class="history-tab active" onclick="gecmisSekmesi('bekleyen', this)">Bekleyen</div>
+                    <div class="history-tab" onclick="gecmisSekmesi('onaylanan', this)">Onaylanan</div>
+                    <div class="history-tab" onclick="gecmisSekmesi('reddedilen', this)">Reddedilen</div>
+                </div>
+                <div id="history-list">
+                    <p style="color:#666; text-align:center;">Geçmiş yükleniyor...</p>
+                </div>
+
+                <!-- Destek ve Hesap Silme -->
+                <div class="section-title" style="font-size:16px; margin-top:20px;">⚙️ Ayarlar</div>
+                <div class="profile-info">
+                    <button class="task-btn" style="background:#4da6ff;" onclick="destekTalebiAc()">📞 Destek / Şikayet Bildir</button>
+                    <button class="danger-btn" onclick="hesabiSil()">Hesabımı Sil</button>
+                </div>
+            </div>
         </div>
 
-        <!-- ALT MENÜ -->
+        <!-- ALT MENÜ (5 Sekme) -->
         <div class="bottom-nav">
             <button class="nav-item active" onclick="sekmeDegistirUser('tasks-tab', this)"><i>📋</i>Görevler</button>
             <button class="nav-item" onclick="sekmeDegistirUser('giveaways-tab', this)"><i>🎁</i>Çekiliş</button>
             <button class="nav-item" onclick="sekmeDegistirUser('store-tab', this)"><i>🛒</i>Mağaza</button>
             <button class="nav-item" onclick="sekmeDegistirUser('inventory-tab', this)"><i>🎒</i>Envanter</button>
+            <button class="nav-item" onclick="sekmeDegistirUser('profile-tab', this)"><i>👤</i>Profil</button>
         </div>
     </div>
 
-    <!-- GÖREV DETAY SAYFASI (Tam Ekran, Başlangıçta gizli) -->
+    <!-- GÖREV DETAY SAYFASI -->
     <div id="task-detail-page">
         <div class="detail-header">
             <button class="back-btn" onclick="detayKapat()">←</button>
             <h2 style="font-size: 18px;">Görev Detayı</h2>
         </div>
-        
         <div class="detail-content">
             <div class="detail-title" id="detail-task-title">Görev Adı</div>
             <div class="detail-reward" id="detail-task-reward">+100 NC</div>
-            
             <div class="instruction-box">
                 <h3>📋 Nasıl Yapılır?</h3>
                 <p id="detail-task-instruction">Talimatlar burada görünecek.</p>
             </div>
-            
             <a href="#" target="_blank" class="task-link-btn" id="detail-task-link">🔗 Göreve Git</a>
-            
             <div class="upload-area">
                 <h3 style="margin-bottom: 15px; font-size: 16px;">📸 Kanıt Yükle</h3>
-                <label for="detail-file-input" class="upload-label" id="upload-label">
-                    Resim Seçmek İçin Tıkla
-                </label>
+                <label for="detail-file-input" class="upload-label" id="upload-label">Resim Seçmek İçin Tıkla</label>
                 <input type="file" id="detail-file-input" accept="image/*" class="upload-input" onchange="resimOnizle(this)">
                 <img id="detail-image-preview">
                 <button class="submit-proof-btn" id="btn-submit-proof" onclick="kanitiGonder()">Kanıtı Gönder</button>
@@ -220,39 +237,44 @@
             var sections = document.querySelectorAll('.page-section');
             for(var j=0; j<sections.length; j++){ sections[j].classList.remove('active'); }
             document.getElementById(targetId).classList.add('active');
+            
             if(targetId === 'inventory-tab') envanteriYukle();
+            else if(targetId === 'profile-tab') profilYukle();
         }
 
         // --- KULLANICI BAKİYESİ ---
         function kullaniciVerileriniYukle(uid, email) {
             db.collection("users").doc(uid).onSnapshot(function(doc) {
-                if (doc.exists) { document.getElementById('user-balance').innerText = doc.data().balance + " NC"; }
-                else { db.collection("users").doc(uid).set({ email: email, balance: 0 }); document.getElementById('user-balance').innerText = "0 NC"; }
+                if (doc.exists) { 
+                    document.getElementById('user-balance').innerText = doc.data().balance + " NC"; 
+                    if(document.getElementById('profile-balance')) {
+                        document.getElementById('profile-balance').innerText = doc.data().balance + " NC";
+                    }
+                }
+                else { 
+                    db.collection("users").doc(uid).set({ email: email, balance: 0 }); 
+                    document.getElementById('user-balance').innerText = "0 NC"; 
+                }
             });
         }
 
-        // --- GÖREVLERİ LİSTELE (Yapılanları Gizle) ---
+        // --- GÖREVLERİ LİSTELE ---
         function gorevleriYukleUser() {
             var list = document.getElementById('user-task-list');
             list.innerHTML = 'Yükleniyor...';
-            
-            // Önce kullanıcının hangi görevleri yaptığını bul (kanıt gönderdiklerini)
             db.collection("proofs").where("userEmail", "==", currentUser.email).get().then(function(proofSnapshot) {
                 var yapilanGorevler = [];
                 proofSnapshot.forEach(function(doc) {
                     var proof = doc.data();
-                    if(!proof.giveawayId) { yapilanGorevler.push(proof.taskTitle); } // Çekiliş değilse listeye ekle
+                    if(!proof.giveawayId) { yapilanGorevler.push(proof.taskTitle); }
                 });
 
-                // Şimdi tüm görevleri çek ve yapılmayanları göster
                 db.collection("tasks").get().then(function(querySnapshot) {
                     list.innerHTML = '';
                     var gosterilecekGorevVarMi = false;
 
                     querySnapshot.forEach(function(doc) {
                         var task = doc.data();
-                        
-                        // Eğer bu görev daha önce yapılmamışsa listeye ekle
                         if (!yapilanGorevler.includes(task.title)) {
                             gosterilecekGorevVarMi = true;
                             list.innerHTML += `
@@ -263,20 +285,15 @@
                             </div>`;
                         }
                     });
-
-                    if(!gosterilecekGorevVarMi) {
-                        list.innerHTML = '<p style="color: #666; text-align: center;">Şu an yapılacak yeni bir görev yok. Harikasın!</p>';
-                    }
+                    if(!gosterilecekGorevVarMi) list.innerHTML = '<p style="color: #666; text-align: center;">Şu an yapılacak yeni bir görev yok. Harikasın!</p>';
                 });
             });
         }
 
-        // --- ÇEKİLİŞLERİ LİSTELE (Katılınanları Gizle) ---
+        // --- ÇEKİLİŞLERİ LİSTELE ---
         function cekilisleriYukleUser() {
             var list = document.getElementById('user-giveaway-list');
             list.innerHTML = 'Yükleniyor...';
-            
-            // Kullanıcının katıldığı çekilişleri bul
             db.collection("proofs").where("userEmail", "==", currentUser.email).get().then(function(proofSnapshot) {
                 var katilinanCekilisler = [];
                 proofSnapshot.forEach(function(doc) {
@@ -284,15 +301,12 @@
                     if(proof.giveawayId) { katilinanCekilisler.push(proof.giveawayId); }
                 });
 
-                // Aktif çekilişleri çek
                 db.collection("giveaways").where("status", "==", "active").get().then(function(querySnapshot) {
                     list.innerHTML = '';
                     var gosterilecekVarMi = false;
 
                     querySnapshot.forEach(function(doc) {
                         var data = doc.data();
-                        
-                        // Eğer bu çekilişe katılmamışsa listeye ekle
                         if (!katilinanCekilisler.includes(doc.id)) {
                             gosterilecekVarMi = true;
                             var pCount = data.participants ? data.participants.length : 0;
@@ -306,10 +320,7 @@
                             </div>`;
                         }
                     });
-
-                    if(!gosterilecekVarMi) {
-                        list.innerHTML = '<p style="color: #666; text-align: center;">Şu an katılabileceğiniz yeni bir çekiliş yok.</p>';
-                    }
+                    if(!gosterilecekVarMi) list.innerHTML = '<p style="color: #666; text-align: center;">Şu an katılabileceğiniz yeni bir çekiliş yok.</p>';
                 });
             });
         }
@@ -340,39 +351,124 @@
             });
         }
 
+        // --- PROFİL SAYFASI İŞLEMLERİ ---
+        function profilYukle() {
+            document.getElementById('profile-email').innerText = currentUser.email;
+            
+            // Davet Linki Oluştur (Sayfa linki + ?ref=UID)
+            var baseUrl = window.location.href.split('?')[0]; // Varsa eski parametreleri temizle
+            var davetLinki = baseUrl + "?ref=" + currentUser.uid;
+            document.getElementById('invite-link').value = davetLinki;
+            
+            gecmisiYukle('bekleyen');
+        }
+
+        function linkKopyala() {
+            var copyText = document.getElementById("invite-link");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            document.execCommand("copy");
+            alert("Davet linki kopyalandı! Arkadaşlarınla paylaşabilirsin.");
+        }
+
+        function gecmisSekmesi(durum, btn) {
+            var tabs = document.querySelectorAll('.history-tab');
+            for(var i=0; i<tabs.length; i++){ tabs[i].classList.remove('active'); }
+            btn.classList.add('active');
+            gecmisiYukle(durum);
+        }
+
+        function gecmisiYukle(durum) {
+            var list = document.getElementById('history-list');
+            list.innerHTML = 'Yükleniyor...';
+            
+            var dbDurum = "pending";
+            if(durum === 'onaylanan') dbDurum = "approved";
+            if(durum === 'reddedilen') dbDurum = "rejected";
+
+            db.collection("proofs").where("userEmail", "==", currentUser.email).where("status", "==", dbDurum).get().then(function(querySnapshot) {
+                list.innerHTML = querySnapshot.empty ? '<p style="color:#666; text-align:center;">Bu kategoride kayıt bulunmuyor.</p>' : '';
+                
+                querySnapshot.forEach(function(doc) {
+                    var data = doc.data();
+                    var durumText = "";
+                    if(durum === 'bekleyen') durumText = '<span class="status-bekliyor">⏳ Onay Bekliyor</span>';
+                    else if(durum === 'onaylanan') durumText = '<span class="status-onaylandi">✅ Onaylandı</span>';
+                    else if(durum === 'reddedilen') durumText = '<span class="status-reddedildi">❌ Reddedildi</span>';
+                    
+                    var tip = data.giveawayId ? "🎁 Çekiliş" : "📝 Görev";
+
+                    list.innerHTML += `
+                    <div class="history-item">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                            <b>${tip}: ${data.taskTitle}</b>
+                            ${durumText}
+                        </div>
+                        <span style="font-size:12px; color:#888;">Tarih: ${new Date().toLocaleDateString('tr-TR')}</span>
+                    </div>`;
+                });
+            });
+        }
+
+        function destekTalebiAc() {
+            var mesaj = prompt("Lütfen sorununuzu veya şikayetinizi kısaca yazın:");
+            if (mesaj && mesaj.trim() !== "") {
+                db.collection("tickets").add({
+                    userEmail: currentUser.email,
+                    message: mesaj,
+                    status: "open",
+                    createdAt: new Date()
+                }).then(function() {
+                    alert("Destek talebiniz başarıyla iletildi. En kısa sürede dönüş yapılacaktır.");
+                }).catch(function(error) {
+                    alert("Hata: " + error.message);
+                });
+            }
+        }
+
+        function hesabiSil() {
+            if (confirm("Hesabınızı kalıcı olarak silmek istediğinize emin misiniz? Tüm bakiyeniz ve bilgileriniz silinecektir. Bu işlem geri alınamaz!")) {
+                // 1. Veritabanından kullanıcıyı sil
+                db.collection("users").doc(currentUser.uid).delete().then(function() {
+                    // 2. Authentication'dan kullanıcıyı sil
+                    currentUser.delete().then(function() {
+                        alert("Hesabınız başarıyla silindi. Görüşmek üzere!");
+                        window.location.reload();
+                    }).catch(function(error) {
+                        alert("Hesap silinirken hata oluştu (Lütfen tekrar giriş yapıp deneyin): " + error.message);
+                    });
+                }).catch(function(error) {
+                    alert("Hata: " + error.message);
+                });
+            }
+        }
+
         // --- DETAY SAYFASI İŞLEMLERİ ---
         function detayAc(taskTitle, amount, giveawayId, url, instruction) {
-            seciliGorev = taskTitle; 
-            seciliOdul = amount; 
-            seciliCekilisId = giveawayId;
-            seciliResimBase64 = "";
+            seciliGorev = taskTitle; seciliOdul = amount; seciliCekilisId = giveawayId; seciliResimBase64 = "";
 
             document.getElementById('detail-task-title').innerText = taskTitle;
             document.getElementById('detail-task-reward').innerText = giveawayId ? ("Katılım Bedeli: " + amount + " NC") : ("+" + amount + " NC");
             document.getElementById('detail-task-instruction').innerText = instruction || "Bu görev için özel bir talimat girilmemiş. Linke gidip gereğini yapın.";
             document.getElementById('detail-task-link').href = url;
 
-            // Formu sıfırla
             document.getElementById('detail-file-input').value = "";
             document.getElementById('detail-image-preview').style.display = "none";
             document.getElementById('detail-image-preview').src = "";
             document.getElementById('upload-label').innerText = "Resim Seçmek İçin Tıkla";
             document.getElementById('upload-label').style.color = "#888";
+            document.getElementById('upload-label').style.borderColor = "#ccc";
             
             var btn = document.getElementById('btn-submit-proof');
             btn.innerText = "Kanıtı Gönder";
             btn.disabled = false;
             btn.style.background = "#00ff88";
 
-            // Sayfayı göster
             document.getElementById('task-detail-page').style.display = 'flex';
         }
 
-        function detayKapat() {
-            document.getElementById('task-detail-page').style.display = 'none';
-        }
+        function detayKapat() { document.getElementById('task-detail-page').style.display = 'none'; }
 
-        // Resmi sıkıştır ve önizle
         function resimOnizle(input) {
             if (input.files && input.files[0]) {
                 var file = input.files[0];
@@ -405,7 +501,6 @@
             }
         }
 
-        // Kanıtı Gönder
         function kanitiGonder() {
             if (!seciliResimBase64) { alert("Lütfen önce bir ekran görüntüsü seçin!"); return; }
             
@@ -430,7 +525,6 @@
             db.collection("proofs").add(proofData).then(function() {
                 alert("Başarıyla gönderildi! Yönetici onayladıktan sonra işleminiz gerçekleşecek.");
                 detayKapat();
-                // Listeleri yenile ki yapılan görev listeden kalksın
                 gorevleriYukleUser();
                 cekilisleriYukleUser();
             }).catch(function(error) {
@@ -441,7 +535,6 @@
             });
         }
 
-        // Satın Alma
         function satinAl(productName, price) {
             if (confirm(productName + " ürününü " + price + " NC karşılığında satın almak istiyor musunuz?")) {
                 db.collection("orders").add({ productName: productName, price: price, userEmail: currentUser.email, status: "pending", createdAt: new Date() })
