@@ -7,41 +7,74 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f4f6f9; color: #333; height: 100vh; display: flex; flex-direction: column; }
+        body { background-color: #f4f6f9; color: #333; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        .header { background-color: #ffcc00; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        /* Üst Bar */
+        .header { background-color: #ffcc00; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 10; }
         .header h1 { font-size: 22px; color: #121212; font-weight: 800; }
         .user-info { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: bold; }
         .logout-btn { background: #121212; color: white; border: none; padding: 5px 10px; border-radius: 5px; font-size: 12px; cursor: pointer; }
 
+        /* Ana İçerik */
         .content { flex: 1; padding: 20px; overflow-y: auto; padding-bottom: 80px; }
-        .page-section { display: none; }
+        .page-section { display: none; height: 100%; }
         .page-section.active { display: block; }
         
         .section-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #121212; }
         
+        /* Görev Kartları */
         .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .task-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; }
         .task-reward { display: inline-block; background: #e6f9f0; color: #00b359; padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; margin-bottom: 10px; }
-        .task-btn { background: #121212; color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .task-btn { background: #121212; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
-        .nav-item { text-align: center; color: #888; font-size: 12px; cursor: pointer; border: none; background: none; }
+        /* Alt Menü */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 10; }
+        .nav-item { text-align: center; color: #888; font-size: 12px; cursor: pointer; border: none; background: none; width: 25%; }
         .nav-item.active { color: #ffcc00; font-weight: bold; }
         .nav-item i { display: block; font-size: 20px; margin-bottom: 5px; font-style: normal; }
 
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-content { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; }
-        .modal-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; }
-        .modal-input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 15px; }
-        .modal-btn-group { display: flex; gap: 10px; }
-        .btn-cancel { background: #ccc; color: #333; border: none; padding: 10px; border-radius: 5px; flex: 1; font-weight: bold; cursor: pointer; }
-        .btn-submit { background: #00ff88; color: #121212; border: none; padding: 10px; border-radius: 5px; flex: 1; font-weight: bold; cursor: pointer; }
+        /* GÖREV DETAY SAYFASI (Tam Ekran) */
+        #task-detail-page {
+            display: none; /* Başlangıçta gizli */
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #f4f6f9;
+            z-index: 2000;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        
+        .detail-header { background: #121212; color: white; padding: 20px; display: flex; align-items: center; gap: 15px; }
+        .back-btn { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
+        
+        .detail-content { padding: 20px; }
+        .detail-title { font-size: 22px; font-weight: bold; margin-bottom: 10px; color: #121212; }
+        .detail-reward { background: #e6f9f0; color: #00b359; padding: 8px 15px; border-radius: 20px; font-weight: bold; display: inline-block; margin-bottom: 20px; }
+        
+        .instruction-box { background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 4px solid #ffcc00; }
+        .instruction-box h3 { font-size: 16px; margin-bottom: 10px; color: #333; }
+        .instruction-box p { font-size: 14px; color: #555; line-height: 1.5; }
+        
+        .task-link-btn { display: block; text-align: center; background: #4da6ff; color: white; text-decoration: none; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 16px; margin-bottom: 20px; }
+        
+        .upload-area { background: white; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .upload-input { display: none; }
+        .upload-label { display: block; padding: 40px 20px; border: 2px dashed #ccc; border-radius: 8px; cursor: pointer; color: #888; margin-bottom: 15px; }
+        .upload-label:hover { background: #f9f9f9; }
+        #detail-image-preview { width: 100%; max-height: 250px; object-fit: contain; border-radius: 8px; display: none; margin-bottom: 15px; border: 1px solid #ddd; }
+        
+        .submit-proof-btn { background: #00ff88; color: #121212; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
+        .submit-proof-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+        /* Giriş Ekranı */
+        #login-area { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; padding: 20px; text-align: center; background: #f4f6f9; }
     </style>
 </head>
 <body>
 
-    <div id="login-area" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; padding: 20px; text-align: center;">
+    <!-- GİRİŞ EKRANI -->
+    <div id="login-area">
         <h1 style="font-size: 40px; margin-bottom: 10px;">👑</h1>
         <h2 style="margin-bottom: 20px;">Nahyec'e Hoş Geldin!</h2>
         <p style="color: #666; margin-bottom: 30px;">Görevleri yap, NC kazan ve ödüllerini al.</p>
@@ -51,6 +84,7 @@
         </button>
     </div>
 
+    <!-- ANA UYGULAMA -->
     <div id="app-area" style="display: none; flex-direction: column; height: 100vh;">
         
         <div class="header">
@@ -62,21 +96,25 @@
         </div>
 
         <div class="content">
+            <!-- GÖREVLER SEKMEsi -->
             <div id="tasks-tab" class="page-section active">
                 <div class="section-title">Yapılacak Görevler</div>
                 <div id="user-task-list"></div>
             </div>
 
+            <!-- ÇEKİLİŞLER SEKMEsi -->
             <div id="giveaways-tab" class="page-section">
                 <div class="section-title">🎁 Aktif Çekilişler</div>
                 <div id="user-giveaway-list"></div>
             </div>
 
+            <!-- MAĞAZA SEKMEsi -->
             <div id="store-tab" class="page-section">
                 <div class="section-title">Ödül Mağazası</div>
                 <div id="user-store-list"></div>
             </div>
 
+            <!-- ENVANTER SEKMESİ -->
             <div id="inventory-tab" class="page-section">
                 <div class="section-title">Envanterim</div>
                 <div id="user-inventory-list">
@@ -85,7 +123,7 @@
             </div>
         </div>
 
-        <!-- ALT MENÜ (Çekilişler Eklendi) -->
+        <!-- ALT MENÜ -->
         <div class="bottom-nav">
             <button class="nav-item active" onclick="sekmeDegistirUser('tasks-tab', this)"><i>📋</i>Görevler</button>
             <button class="nav-item" onclick="sekmeDegistirUser('giveaways-tab', this)"><i>🎁</i>Çekiliş</button>
@@ -94,19 +132,32 @@
         </div>
     </div>
 
-    <!-- KANIT YÜKLEME MODALI -->
-    <div id="proof-modal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-title" id="modal-task-title">Görev Adı</div>
-            <p style="font-size: 14px; color: #666; margin-bottom: 15px;">Lütfen yaptığınız görevin ekran görüntüsünü (SS) seçin.</p>
+    <!-- GÖREV DETAY SAYFASI (Tam Ekran, Başlangıçta gizli) -->
+    <div id="task-detail-page">
+        <div class="detail-header">
+            <button class="back-btn" onclick="detayKapat()">←</button>
+            <h2 style="font-size: 18px;">Görev Detayı</h2>
+        </div>
+        
+        <div class="detail-content">
+            <div class="detail-title" id="detail-task-title">Görev Adı</div>
+            <div class="detail-reward" id="detail-task-reward">+100 NC</div>
             
-            <input type="file" id="proof-image-input" accept="image/*" class="modal-input" onchange="resimOnizle(this)">
+            <div class="instruction-box">
+                <h3>📋 Nasıl Yapılır?</h3>
+                <p id="detail-task-instruction">Talimatlar burada görünecek.</p>
+            </div>
             
-            <img id="proof-image-preview" style="display: none; width: 100%; max-height: 200px; object-fit: contain; border-radius: 5px; margin-bottom: 15px; border: 1px solid #ddd;">
-
-            <div class="modal-btn-group">
-                <button class="btn-cancel" onclick="modalKapat()">İptal</button>
-                <button class="btn-submit" id="btn-submit-proof">Kanıtı Gönder</button>
+            <a href="#" target="_blank" class="task-link-btn" id="detail-task-link">🔗 Göreve Git</a>
+            
+            <div class="upload-area">
+                <h3 style="margin-bottom: 15px; font-size: 16px;">📸 Kanıt Yükle</h3>
+                <label for="detail-file-input" class="upload-label" id="upload-label">
+                    Resim Seçmek İçin Tıkla
+                </label>
+                <input type="file" id="detail-file-input" accept="image/*" class="upload-input" onchange="resimOnizle(this)">
+                <img id="detail-image-preview">
+                <button class="submit-proof-btn" id="btn-submit-proof" onclick="kanitiGonder()">Kanıtı Gönder</button>
             </div>
         </div>
     </div>
@@ -131,10 +182,10 @@
         var db = firebase.firestore();
         var currentUser = null;
 
-        // Modal değişkenleri
+        // Detay sayfası için global değişkenler
         var seciliGorev = "";
         var seciliOdul = 0;
-        var seciliCekilisId = null; // Eğer çekilişe katılıyorsa buraya ID gelecek
+        var seciliCekilisId = null;
         var seciliResimBase64 = "";
 
         // --- GİRİŞ İŞLEMLERİ ---
@@ -157,6 +208,7 @@
             } else {
                 document.getElementById('login-area').style.display = 'flex';
                 document.getElementById('app-area').style.display = 'none';
+                detayKapat();
             }
         });
 
@@ -179,36 +231,85 @@
             });
         }
 
-        // --- GÖREVLERİ LİSTELE ---
+        // --- GÖREVLERİ LİSTELE (Yapılanları Gizle) ---
         function gorevleriYukleUser() {
             var list = document.getElementById('user-task-list');
             list.innerHTML = 'Yükleniyor...';
-            db.collection("tasks").get().then(function(querySnapshot) {
-                list.innerHTML = querySnapshot.empty ? '<p>Şu an görev yok.</p>' : '';
-                querySnapshot.forEach(function(doc) {
-                    var task = doc.data();
-                    list.innerHTML += `<div class="card"><div class="task-title">${task.title}</div><div class="task-reward">+${task.reward} NC</div><button class="task-btn" onclick="modalAc('${task.title}', ${task.reward}, null)">Görevi Yap ve Kanıt Yükle</button></div>`;
+            
+            // Önce kullanıcının hangi görevleri yaptığını bul (kanıt gönderdiklerini)
+            db.collection("proofs").where("userEmail", "==", currentUser.email).get().then(function(proofSnapshot) {
+                var yapilanGorevler = [];
+                proofSnapshot.forEach(function(doc) {
+                    var proof = doc.data();
+                    if(!proof.giveawayId) { yapilanGorevler.push(proof.taskTitle); } // Çekiliş değilse listeye ekle
+                });
+
+                // Şimdi tüm görevleri çek ve yapılmayanları göster
+                db.collection("tasks").get().then(function(querySnapshot) {
+                    list.innerHTML = '';
+                    var gosterilecekGorevVarMi = false;
+
+                    querySnapshot.forEach(function(doc) {
+                        var task = doc.data();
+                        
+                        // Eğer bu görev daha önce yapılmamışsa listeye ekle
+                        if (!yapilanGorevler.includes(task.title)) {
+                            gosterilecekGorevVarMi = true;
+                            list.innerHTML += `
+                            <div class="card">
+                                <div class="task-title">${task.title}</div>
+                                <div class="task-reward">+${task.reward} NC</div>
+                                <button class="task-btn" onclick="detayAc('${task.title}', ${task.reward}, null, '${task.url}', '${task.instruction || 'Talimat yok.'}')">Göreve Git</button>
+                            </div>`;
+                        }
+                    });
+
+                    if(!gosterilecekGorevVarMi) {
+                        list.innerHTML = '<p style="color: #666; text-align: center;">Şu an yapılacak yeni bir görev yok. Harikasın!</p>';
+                    }
                 });
             });
         }
 
-        // --- ÇEKİLİŞLERİ LİSTELE ---
+        // --- ÇEKİLİŞLERİ LİSTELE (Katılınanları Gizle) ---
         function cekilisleriYukleUser() {
             var list = document.getElementById('user-giveaway-list');
             list.innerHTML = 'Yükleniyor...';
-            db.collection("giveaways").where("status", "==", "active").get().then(function(querySnapshot) {
-                list.innerHTML = querySnapshot.empty ? '<p>Şu an aktif çekiliş yok.</p>' : '';
-                querySnapshot.forEach(function(doc) {
-                    var data = doc.data();
-                    var pCount = data.participants ? data.participants.length : 0;
-                    list.innerHTML += `
-                    <div class="card" style="border-left: 4px solid #ff00ff;">
-                        <div class="task-title">🎁 ${data.prize}</div>
-                        <div class="task-reward" style="background: #fce6ff; color: #cc00cc;">Katılım: ${data.cost} NC</div>
-                        <p style="font-size: 13px; color: #666; margin-bottom: 10px;">Şart: ${data.taskTitle}</p>
-                        <p style="font-size: 12px; color: #999; margin-bottom: 10px;">Katılımcı: ${pCount} Kişi</p>
-                        <button class="task-btn" style="background: #ff00ff;" onclick="modalAc('${data.taskTitle}', ${data.cost}, '${doc.id}')">Görevi Yap ve Katıl</button>
-                    </div>`;
+            
+            // Kullanıcının katıldığı çekilişleri bul
+            db.collection("proofs").where("userEmail", "==", currentUser.email).get().then(function(proofSnapshot) {
+                var katilinanCekilisler = [];
+                proofSnapshot.forEach(function(doc) {
+                    var proof = doc.data();
+                    if(proof.giveawayId) { katilinanCekilisler.push(proof.giveawayId); }
+                });
+
+                // Aktif çekilişleri çek
+                db.collection("giveaways").where("status", "==", "active").get().then(function(querySnapshot) {
+                    list.innerHTML = '';
+                    var gosterilecekVarMi = false;
+
+                    querySnapshot.forEach(function(doc) {
+                        var data = doc.data();
+                        
+                        // Eğer bu çekilişe katılmamışsa listeye ekle
+                        if (!katilinanCekilisler.includes(doc.id)) {
+                            gosterilecekVarMi = true;
+                            var pCount = data.participants ? data.participants.length : 0;
+                            list.innerHTML += `
+                            <div class="card" style="border-left: 4px solid #ff00ff;">
+                                <div class="task-title">🎁 ${data.prize}</div>
+                                <div class="task-reward" style="background: #fce6ff; color: #cc00cc;">Katılım: ${data.cost} NC</div>
+                                <p style="font-size: 13px; color: #666; margin-bottom: 10px;">Şart: ${data.taskTitle}</p>
+                                <p style="font-size: 12px; color: #999; margin-bottom: 10px;">Katılımcı: ${pCount} Kişi</p>
+                                <button class="task-btn" style="background: #ff00ff;" onclick="detayAc('${data.taskTitle}', ${data.cost}, '${doc.id}', '${data.taskUrl}', 'Çekilişe katılmak için linke git ve görevi yap.')">Görevi Yap ve Katıl</button>
+                            </div>`;
+                        }
+                    });
+
+                    if(!gosterilecekVarMi) {
+                        list.innerHTML = '<p style="color: #666; text-align: center;">Şu an katılabileceğiniz yeni bir çekiliş yok.</p>';
+                    }
                 });
             });
         }
@@ -239,24 +340,39 @@
             });
         }
 
-        // --- MODAL İŞLEMLERİ ---
-        function modalAc(taskTitle, amount, giveawayId) {
+        // --- DETAY SAYFASI İŞLEMLERİ ---
+        function detayAc(taskTitle, amount, giveawayId, url, instruction) {
             seciliGorev = taskTitle; 
             seciliOdul = amount; 
-            seciliCekilisId = giveawayId; // Null ise normal görev, doluysa çekiliş
+            seciliCekilisId = giveawayId;
             seciliResimBase64 = "";
 
-            document.getElementById('modal-task-title').innerText = "Görev: " + taskTitle;
-            document.getElementById('proof-image-input').value = "";
-            document.getElementById('proof-image-preview').style.display = "none";
-            document.getElementById('btn-submit-proof').innerText = "Kanıtı Gönder";
-            document.getElementById('btn-submit-proof').disabled = false;
-            document.getElementById('proof-modal').style.display = 'flex';
+            document.getElementById('detail-task-title').innerText = taskTitle;
+            document.getElementById('detail-task-reward').innerText = giveawayId ? ("Katılım Bedeli: " + amount + " NC") : ("+" + amount + " NC");
+            document.getElementById('detail-task-instruction').innerText = instruction || "Bu görev için özel bir talimat girilmemiş. Linke gidip gereğini yapın.";
+            document.getElementById('detail-task-link').href = url;
+
+            // Formu sıfırla
+            document.getElementById('detail-file-input').value = "";
+            document.getElementById('detail-image-preview').style.display = "none";
+            document.getElementById('detail-image-preview').src = "";
+            document.getElementById('upload-label').innerText = "Resim Seçmek İçin Tıkla";
+            document.getElementById('upload-label').style.color = "#888";
+            
+            var btn = document.getElementById('btn-submit-proof');
+            btn.innerText = "Kanıtı Gönder";
+            btn.disabled = false;
+            btn.style.background = "#00ff88";
+
+            // Sayfayı göster
+            document.getElementById('task-detail-page').style.display = 'flex';
         }
 
-        function modalKapat() { document.getElementById('proof-modal').style.display = 'none'; }
+        function detayKapat() {
+            document.getElementById('task-detail-page').style.display = 'none';
+        }
 
-        // Resmi sıkıştır ve Base64'e çevir
+        // Resmi sıkıştır ve önizle
         function resimOnizle(input) {
             if (input.files && input.files[0]) {
                 var file = input.files[0];
@@ -271,10 +387,17 @@
                         canvas.width = img.width * scale;
                         canvas.height = img.height * scale;
                         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        
                         seciliResimBase64 = canvas.toDataURL('image/jpeg', 0.7);
-                        var preview = document.getElementById('proof-image-preview');
+                        
+                        var preview = document.getElementById('detail-image-preview');
                         preview.src = seciliResimBase64;
                         preview.style.display = "block";
+                        
+                        var label = document.getElementById('upload-label');
+                        label.innerText = "✅ Resim Seçildi (Değiştirmek için tıkla)";
+                        label.style.color = "#00b359";
+                        label.style.borderColor = "#00b359";
                     };
                     img.src = e.target.result;
                 };
@@ -283,25 +406,18 @@
         }
 
         // Kanıtı Gönder
-        document.getElementById('btn-submit-proof').addEventListener('click', function() {
+        function kanitiGonder() {
             if (!seciliResimBase64) { alert("Lütfen önce bir ekran görüntüsü seçin!"); return; }
             
-            // Eğer çekilişse bakiyeyi kontrol et
-            if (seciliCekilisId) {
-                var bakiyeText = document.getElementById('user-balance').innerText;
-                var bakiye = parseInt(bakiyeText.replace(" NC", ""));
-                if (bakiye < seciliOdul) { // Çekilişte seciliOdul aslında katılım bedelidir
-                    alert("Yetersiz bakiye! Bu çekilişe katılmak için " + seciliOdul + " NC gerekiyor.");
-                    return;
-                }
-            }
-
-            this.innerText = "Gönderiliyor..."; this.disabled = true;
+            var btn = document.getElementById('btn-submit-proof');
+            btn.innerText = "Gönderiliyor..."; 
+            btn.disabled = true;
+            btn.style.background = "#ccc";
 
             var proofData = {
                 taskTitle: seciliGorev, 
                 userEmail: currentUser.email, 
-                reward: seciliCekilisId ? 0 : seciliOdul, // Normal görevse ödülü yaz, çekilişse 0
+                reward: seciliCekilisId ? 0 : seciliOdul,
                 imageUrl: seciliResimBase64, 
                 status: "pending"
             };
@@ -312,14 +428,18 @@
             }
 
             db.collection("proofs").add(proofData).then(function() {
-                alert(seciliCekilisId ? "Çekiliş katılım kanıtınız yönetici onayına gönderildi!" : "Kanıtınız başarıyla yönetici onayına gönderildi!");
-                modalKapat();
+                alert("Başarıyla gönderildi! Yönetici onayladıktan sonra işleminiz gerçekleşecek.");
+                detayKapat();
+                // Listeleri yenile ki yapılan görev listeden kalksın
+                gorevleriYukleUser();
+                cekilisleriYukleUser();
             }).catch(function(error) {
                 alert("Hata: " + error.message);
-                document.getElementById('btn-submit-proof').innerText = "Kanıtı Gönder";
-                document.getElementById('btn-submit-proof').disabled = false;
+                btn.innerText = "Kanıtı Gönder";
+                btn.disabled = false;
+                btn.style.background = "#00ff88";
             });
-        });
+        }
 
         // Satın Alma
         function satinAl(productName, price) {
