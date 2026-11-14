@@ -30,7 +30,6 @@
         .nav-item.active { color: #ffcc00; font-weight: bold; }
         .nav-item i { display: block; font-size: 20px; margin-bottom: 5px; font-style: normal; }
 
-        /* MODAL (Kanıt Yükleme Ekranı) */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
         .modal-content { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; }
         .modal-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; }
@@ -42,7 +41,6 @@
 </head>
 <body>
 
-    <!-- GİRİŞ EKRANI -->
     <div id="login-area" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; padding: 20px; text-align: center;">
         <h1 style="font-size: 40px; margin-bottom: 10px;">👑</h1>
         <h2 style="margin-bottom: 20px;">Nahyec'e Hoş Geldin!</h2>
@@ -53,7 +51,6 @@
         </button>
     </div>
 
-    <!-- UYGULAMA İÇİ -->
     <div id="app-area" style="display: none; flex-direction: column; height: 100vh;">
         
         <div class="header">
@@ -90,16 +87,13 @@
         </div>
     </div>
 
-    <!-- KANIT YÜKLEME MODALI (Gizli Başlar) -->
     <div id="proof-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-title" id="modal-task-title">Görev Adı</div>
             <p style="font-size: 14px; color: #666; margin-bottom: 15px;">Lütfen yaptığınız görevin ekran görüntüsünü (SS) seçin.</p>
             
-            <!-- Dosya Seçme İnputu -->
             <input type="file" id="proof-image-input" accept="image/*" class="modal-input" onchange="resimOnizle(this)">
             
-            <!-- Önizleme Alanı -->
             <img id="proof-image-preview" style="display: none; width: 100%; max-height: 200px; object-fit: contain; border-radius: 5px; margin-bottom: 15px; border: 1px solid #ddd;">
 
             <div class="modal-btn-group">
@@ -108,8 +102,7 @@
             </div>
         </div>
     </div>
-        <!-- Firebase Kütüphaneleri -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
@@ -129,22 +122,16 @@
         var db = firebase.firestore();
         var currentUser = null;
 
-        // Modal için global değişkenler
         var seciliGorev = "";
         var seciliOdul = 0;
         var seciliResimBase64 = "";
 
-        // --- GİRİŞ İŞLEMLERİ ---
         function googleIleGiris() {
             var provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).catch(function(error) {
-                alert("Giriş hatası: " + error.message);
-            });
+            auth.signInWithPopup(provider).catch(function(error) { alert("Giriş hatası: " + error.message); });
         }
 
-        function cikisYap() {
-            auth.signOut();
-        }
+        function cikisYap() { auth.signOut(); }
 
         auth.onAuthStateChanged(function(user) {
             if (user) {
@@ -160,32 +147,23 @@
             }
         });
 
-        // --- SEKME DEĞİŞTİRME ---
         function sekmeDegistirUser(targetId, btn) {
             var navs = document.querySelectorAll('.nav-item');
             for(var i=0; i<navs.length; i++){ navs[i].classList.remove('active'); }
             btn.classList.add('active');
-            
             var sections = document.querySelectorAll('.page-section');
             for(var j=0; j<sections.length; j++){ sections[j].classList.remove('active'); }
             document.getElementById(targetId).classList.add('active');
-            
             if(targetId === 'inventory-tab') envanteriYukle();
         }
 
-        // --- KULLANICI BAKİYESİ (Anlık Güncelleme) ---
         function kullaniciVerileriniYukle(uid, email) {
             db.collection("users").doc(uid).onSnapshot(function(doc) {
-                if (doc.exists) {
-                    document.getElementById('user-balance').innerText = doc.data().balance + " NC";
-                } else {
-                    db.collection("users").doc(uid).set({ email: email, balance: 0 });
-                    document.getElementById('user-balance').innerText = "0 NC";
-                }
+                if (doc.exists) { document.getElementById('user-balance').innerText = doc.data().balance + " NC"; }
+                else { db.collection("users").doc(uid).set({ email: email, balance: 0 }); document.getElementById('user-balance').innerText = "0 NC"; }
             });
         }
 
-        // --- GÖREVLERİ LİSTELE ---
         function gorevleriYukleUser() {
             var list = document.getElementById('user-task-list');
             list.innerHTML = 'Yükleniyor...';
@@ -193,17 +171,11 @@
                 list.innerHTML = querySnapshot.empty ? '<p>Şu an görev yok.</p>' : '';
                 querySnapshot.forEach(function(doc) {
                     var task = doc.data();
-                    list.innerHTML += `
-                    <div class="card">
-                        <div class="task-title">${task.title}</div>
-                        <div class="task-reward">+${task.reward} NC</div>
-                        <button class="task-btn" onclick="modalAc('${task.title}', ${task.reward})">Görevi Yap ve Kanıt Yükle</button>
-                    </div>`;
+                    list.innerHTML += `<div class="card"><div class="task-title">${task.title}</div><div class="task-reward">+${task.reward} NC</div><button class="task-btn" onclick="modalAc('${task.title}', ${task.reward})">Görevi Yap ve Kanıt Yükle</button></div>`;
                 });
             });
         }
 
-        // --- MAĞAZAYI LİSTELE ---
         function magazayiYukleUser() {
             var list = document.getElementById('user-store-list');
             list.innerHTML = 'Yükleniyor...';
@@ -211,18 +183,11 @@
                 list.innerHTML = querySnapshot.empty ? '<p>Şu an ürün yok.</p>' : '';
                 querySnapshot.forEach(function(doc) {
                     var item = doc.data();
-                    list.innerHTML += `
-                    <div class="card">
-                        <div class="task-title">${item.title}</div>
-                        <div class="task-reward" style="background: #fff0e6; color: #ff6600;">Fiyat: ${item.price} NC</div>
-                        <p style="font-size: 12px; color: #666; margin-bottom: 10px;">Kalan Stok: ${item.stock}</p>
-                        <button class="task-btn" onclick="satinAl('${item.title}', ${item.price})">Satın Al</button>
-                    </div>`;
+                    list.innerHTML += `<div class="card"><div class="task-title">${item.title}</div><div class="task-reward" style="background: #fff0e6; color: #ff6600;">Fiyat: ${item.price} NC</div><p style="font-size: 12px; color: #666; margin-bottom: 10px;">Kalan Stok: ${item.stock}</p><button class="task-btn" onclick="satinAl('${item.title}', ${item.price})">Satın Al</button></div>`;
                 });
             });
         }
 
-        // --- ENVANTERİ LİSTELE ---
         function envanteriYukle() {
             var list = document.getElementById('user-inventory-list');
             list.innerHTML = 'Yükleniyor...';
@@ -230,67 +195,62 @@
                 list.innerHTML = querySnapshot.empty ? '<p style="color: #666; text-align: center;">Henüz bir kodun yok.</p>' : '';
                 querySnapshot.forEach(function(doc) {
                     var order = doc.data();
-                    list.innerHTML += `
-                    <div class="card">
-                        <div class="task-title">${order.productName}</div>
-                        <div style="background: #eee; padding: 10px; border-radius: 5px; font-family: monospace; text-align: center; margin-top: 10px;">
-                            ${order.deliveredCode}
-                        </div>
-                    </div>`;
+                    list.innerHTML += `<div class="card"><div class="task-title">${order.productName}</div><div style="background: #eee; padding: 10px; border-radius: 5px; font-family: monospace; text-align: center; margin-top: 10px;">${order.deliveredCode}</div></div>`;
                 });
             });
         }
 
-        // --- MODAL (KANIT YÜKLEME) İŞLEMLERİ ---
         function modalAc(taskTitle, reward) {
-            seciliGorev = taskTitle;
-            seciliOdul = reward;
-            seciliResimBase64 = "";
-            
+            seciliGorev = taskTitle; seciliOdul = reward; seciliResimBase64 = "";
             document.getElementById('modal-task-title').innerText = "Görev: " + taskTitle;
-            document.getElementById('proof-image-input').value = ""; // Inputu temizle
+            document.getElementById('proof-image-input').value = "";
             document.getElementById('proof-image-preview').style.display = "none";
             document.getElementById('btn-submit-proof').innerText = "Kanıtı Gönder";
             document.getElementById('btn-submit-proof').disabled = false;
-
             document.getElementById('proof-modal').style.display = 'flex';
         }
 
-        function modalKapat() {
-            document.getElementById('proof-modal').style.display = 'none';
-        }
+        function modalKapat() { document.getElementById('proof-modal').style.display = 'none'; }
 
-        // Seçilen resmi önizle ve Base64'e çevir
+        // YENİ: Resmi sıkıştıran ve Base64'e çeviren fonksiyon
         function resimOnizle(input) {
             if (input.files && input.files[0]) {
+                var file = input.files[0];
                 var reader = new FileReader();
                 reader.onload = function(e) {
-                    seciliResimBase64 = e.target.result; // Base64 kodunu kaydet
-                    var img = document.getElementById('proof-image-preview');
+                    var img = new Image();
+                    img.onload = function() {
+                        // Canvas oluşturup resmi yeniden boyutlandırıyoruz
+                        var canvas = document.createElement('canvas');
+                        var ctx = canvas.getContext('2d');
+                        
+                        // Maksimum genişlik 800px, oranı koruyarak yüksekliği hesapla
+                        var maxWidth = 800;
+                        var scale = Math.min(1, maxWidth / img.width);
+                        canvas.width = img.width * scale;
+                        canvas.height = img.height * scale;
+                        
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        
+                        // JPEG formatında %70 kalitede sıkıştır
+                        seciliResimBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                        
+                        var preview = document.getElementById('proof-image-preview');
+                        preview.src = seciliResimBase64;
+                        preview.style.display = "block";
+                    };
                     img.src = e.target.result;
-                    img.style.display = "block";
                 };
-                reader.readAsDataURL(input.files[0]);
+                reader.readAsDataURL(file);
             }
         }
 
-        // Kanıtı Gönder Butonuna Tıklanınca
         document.getElementById('btn-submit-proof').addEventListener('click', function() {
-            if (!seciliResimBase64) {
-                alert("Lütfen önce bir ekran görüntüsü seçin!");
-                return;
-            }
-
-            this.innerText = "Gönderiliyor...";
-            this.disabled = true;
-
-            // Base64 formatındaki resmi veritabanına kaydet
+            if (!seciliResimBase64) { alert("Lütfen önce bir ekran görüntüsü seçin!"); return; }
+            this.innerText = "Gönderiliyor..."; this.disabled = true;
             db.collection("proofs").add({
-                taskTitle: seciliGorev,
-                userEmail: currentUser.email,
-                reward: seciliOdul,
-                imageUrl: seciliResimBase64, // Artık link değil, resmin kendisi
-                status: "pending"
+                taskTitle: seciliGorev, userEmail: currentUser.email, reward: seciliOdul,
+                imageUrl: seciliResimBase64, status: "pending"
             }).then(function() {
                 alert("Kanıtınız başarıyla yönetici onayına gönderildi!");
                 modalKapat();
@@ -301,20 +261,11 @@
             });
         });
 
-        // --- SATIN ALMA ---
         function satinAl(productName, price) {
             if (confirm(productName + " ürününü " + price + " NC karşılığında satın almak istiyor musunuz?")) {
-                db.collection("orders").add({
-                    productName: productName,
-                    price: price,
-                    userEmail: currentUser.email,
-                    status: "pending",
-                    createdAt: new Date()
-                }).then(function() {
-                    alert("Siparişiniz alındı! Yönetici onayından sonra kodunuz envanterinize düşecek.");
-                }).catch(function(error) {
-                    alert("Hata: " + error.message);
-                });
+                db.collection("orders").add({ productName: productName, price: price, userEmail: currentUser.email, status: "pending", createdAt: new Date() })
+                .then(function() { alert("Siparişiniz alındı!"); })
+                .catch(function(error) { alert("Hata: " + error.message); });
             }
         }
     </script>
