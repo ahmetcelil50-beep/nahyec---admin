@@ -17,6 +17,7 @@
         .login-container p { color: #aaa; margin-bottom: 30px; }
         .google-btn { background-color: white; color: #333; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin: 0 auto; transition: 0.3s; width: 100%; }
         .google-btn:hover { background-color: #ddd; }
+        #loading-text { display: none; margin-top: 15px; color: #ffcc00; font-size: 14px; }
 
         /* Dashboard */
         #admin-panel { display: none; height: 100vh; display: flex; }
@@ -74,6 +75,7 @@
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20" alt="G">
                 Google ile Giriş Yap
             </button>
+            <div id="loading-text">Yönlendiriliyor, lütfen bekleyin...</div>
         </div>
     </div>
 
@@ -185,7 +187,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        // DİKKAT: signInWithRedirect ve getRedirectResult eklendi
+        import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -211,9 +214,27 @@
         const pageTitle = document.getElementById('current-page-title');
         const menuItems = document.querySelectorAll('.menu-item');
         const pageSections = document.querySelectorAll('.page-section');
+        const loadingText = document.getElementById('loading-text');
 
+        // Yönlendirme sonucunu kontrol et (Giriş yaptıktan sonra sayfa yenilendiğinde çalışır)
+        getRedirectResult(auth)
+            .then((result) => {
+                if (result) {
+                    console.log("Giriş başarılı:", result.user.email);
+                }
+            })
+            .catch((error) => {
+                alert("Giriş hatası: " + error.message);
+            });
+
+        // Giriş Butonu Artık Yönlendirme Kullanıyor
         googleLoginBtn.addEventListener('click', () => {
-            signInWithPopup(auth, provider).catch((error) => alert("Giriş hatası: " + error.message));
+            loadingText.style.display = 'block';
+            signInWithRedirect(auth, provider)
+                .catch((error) => {
+                    loadingText.style.display = 'none';
+                    alert("Yönlendirme hatası: " + error.message);
+                });
         });
 
         logoutBtn.addEventListener('click', () => { signOut(auth); });
@@ -360,24 +381,4 @@
                     storeItem.className = 'task-item';
                     storeItem.innerHTML = `
                         <div class="task-info">
-                            <h4>${item.title}</h4>
-                            <p>Fiyat: ${item.price} NC</p>
-                            <span>Stok: ${item.stock} Adet</span>
-                        </div>
-                        <button class="btn-delete" onclick="deleteStoreItem('${itemId}')">Sil</button>
-                    `;
-                    storeListContainer.appendChild(storeItem);
-                });
-            } catch (error) {
-                storeListContainer.innerHTML = `<p style="color: #ff4444; text-align: center;">Ürünler yüklenirken hata oluştu: ${error.message}</p>`;
-            }
-        }
-
-        window.deleteStoreItem = async function(itemId) {
-            if (confirm("Bu ürünü mağazadan silmek istediğinize emin misiniz?")) {
-                try {
-                    await deleteDoc(doc(db, "store", itemId));
-                    alert("Ürün başarıyla silindi.");
-                    loadStoreItems(); 
-                } catch (error) {
-          
+                            <h4>$
