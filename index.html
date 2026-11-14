@@ -56,6 +56,13 @@
         .order-input { flex: 1; padding: 10px; background-color: #121212; border: 1px solid #444; border-radius: 5px; color: white; }
         .btn-send { background-color: #00ff88; color: #121212; border: none; padding: 10px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
         .btn-send:hover { background-color: #00cc6a; }
+
+        /* Kanıt Onay Ekranı */
+        .proof-card { background-color: #2a2a2a; border: 1px solid #444; border-radius: 8px; margin-bottom: 15px; padding: 15px; }
+        .proof-img { width: 100%; max-width: 400px; border-radius: 5px; margin-top: 10px; cursor: pointer; border: 1px solid #555; }
+        .proof-actions { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-approve { background-color: #00ff88; color: #121212; padding: 10px 15px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; flex: 1; }
+        .btn-reject { background-color: #ff4444; color: white; padding: 10px 15px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; flex: 1; }
     </style>
 </head>
 <body>
@@ -75,10 +82,10 @@
             <nav class="menu-items">
                 <a class="menu-item active" data-target="overview">📊 Genel Bakış</a>
                 <a class="menu-item" data-target="tasks">📝 Görevler</a>
+                <!-- YENİ: Kanıt Onayları -->
                 <a class="menu-item" data-target="proofs">🖼️ Kanıt Onayları</a>
                 <a class="menu-item" data-target="users">👥 Kullanıcılar</a>
                 <a class="menu-item" data-target="store">🛒 Mağaza & Kodlar</a>
-                <!-- YENİ SEKME: Siparişler -->
                 <a class="menu-item" data-target="orders">📦 Siparişler (Kod Talepleri)</a>
                 <a class="menu-item" data-target="giveaways">🎁 Çekilişler</a>
             </nav>
@@ -100,6 +107,7 @@
                         <div class="stat-card"><span class="stat-title">Dağıtılan NC</span><span class="stat-value" style="color: #00ff88;">0</span></div>
                     </div>
                 </div>
+                
                 <div id="tasks" class="page-section">
                     <div class="content-box">
                         <h2>Yeni Görev Ekle</h2>
@@ -115,6 +123,7 @@
                         <div id="task-list-container"></div>
                     </div>
                 </div>
+
                 <div id="store" class="page-section">
                     <div class="content-box">
                         <h2>Yeni Ürün Ekle</h2>
@@ -131,16 +140,22 @@
                     </div>
                 </div>
 
-                <!-- YENİ SAYFA: Siparişler -->
                 <div id="orders" class="page-section">
                     <div class="content-box">
                         <h2>Bekleyen Kod Talepleri</h2>
-                        <p style="color:#aaa; font-size:14px; margin-bottom:15px;">Kullanıcılar satın alma yaptığında buraya düşer. Kodu yazıp "Gönder" butonuna basın.</p>
                         <div id="order-list-container"></div>
                     </div>
                 </div>
 
-                <div id="proofs" class="page-section"><div class="content-box"><h2>Kanıt Onayları</h2><p>Yakında...</p></div></div>
+                <!-- KANIT ONAYLARI SAYFASI -->
+                <div id="proofs" class="page-section">
+                    <div class="content-box">
+                        <h2>Bekleyen Görev Kanıtları (SS)</h2>
+                        <p style="color:#aaa; font-size:14px; margin-bottom:15px;">Kullanıcıların görev yapıp yüklediği ekran görüntüleri buraya düşer. İnceleyip Onayla veya Reddet deyin.</p>
+                        <div id="proof-list-container"></div>
+                    </div>
+                </div>
+
                 <div id="users" class="page-section"><div class="content-box"><h2>Kullanıcılar</h2><p>Yakında...</p></div></div>
                 <div id="giveaways" class="page-section"><div class="content-box"><h2>Çekilişler</h2><p>Yakında...</p></div></div>
             </div>
@@ -204,16 +219,16 @@
                 if (targetId === 'tasks') loadTasks();
                 else if (targetId === 'store') loadStoreItems();
                 else if (targetId === 'orders') loadOrders();
+                else if (targetId === 'proofs') loadProofs(); // Kanıtları yükle
             });
         });
 
-        // GÖREV EKLEME
+        // --- GÖREV İŞLEMLERİ ---
         document.getElementById('add-task-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             await addDoc(collection(db, "tasks"), { title: document.getElementById('task-title').value, url: document.getElementById('task-url').value, reward: parseInt(document.getElementById('task-reward').value), createdAt: new Date() });
             alert("Eklendi"); e.target.reset(); loadTasks(); 
         });
-
         async function loadTasks() {
             const container = document.getElementById('task-list-container');
             const snapshot = await getDocs(collection(db, "tasks"));
@@ -223,13 +238,12 @@
             });
         }
 
-        // MAĞAZA EKLEME
+        // --- MAĞAZA İŞLEMLERİ ---
         document.getElementById('add-store-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             await addDoc(collection(db, "store"), { title: document.getElementById('store-title').value, price: parseInt(document.getElementById('store-price').value), stock: parseInt(document.getElementById('store-stock').value) });
             alert("Eklendi"); e.target.reset(); loadStoreItems(); 
         });
-
         async function loadStoreItems() {
             const container = document.getElementById('store-list-container');
             const snapshot = await getDocs(collection(db, "store"));
@@ -239,17 +253,13 @@
             });
         }
 
-        // SİPARİŞLERİ LİSTELEME (Sadece durumu "pending" olanlar)
+        // --- SİPARİŞ İŞLEMLERİ ---
         async function loadOrders() {
             const container = document.getElementById('order-list-container');
             container.innerHTML = '<p style="color:#aaa;">Yükleniyor...</p>';
-            
-            // Sadece "Bekliyor" durumundakileri getir
             const q = query(collection(db, "orders"), where("status", "==", "pending"));
             const snapshot = await getDocs(q);
-            
             container.innerHTML = snapshot.empty ? '<p style="color:#aaa;">Bekleyen sipariş yok.</p>' : '';
-            
             snapshot.forEach(doc => {
                 const order = doc.data();
                 container.innerHTML += `
@@ -266,35 +276,34 @@
                 `;
             });
         }
-
-        // KOD GÖNDERME İŞLEMİ
         window.sendCode = async function(orderId) {
             const codeInput = document.getElementById(`code-input-${orderId}`);
             const code = codeInput.value.trim();
-            
             if (!code) { alert("Lütfen bir kod girin!"); return; }
-
             try {
-                // Siparişin durumunu 'completed' yap ve kodu kaydet
-                await updateDoc(doc(db, "orders", orderId), {
-                    status: "completed",
-                    deliveredCode: code,
-                    deliveredAt: new Date()
-                });
-                alert("Kod başarıyla kullanıcıya gönderildi!");
-                loadOrders(); // Listeyi yenile
-            } catch (error) {
-                alert("Hata: " + error.message);
-            }
+                await updateDoc(doc(db, "orders", orderId), { status: "completed", deliveredCode: code, deliveredAt: new Date() });
+                alert("Kod başarıyla kullanıcıya gönderildi!"); loadOrders(); 
+            } catch (error) { alert("Hata: " + error.message); }
         }
 
-        // ORTAK SİLME FONKSİYONU
-        window.deleteDoc = async function(col, id) {
-            if(confirm("Silmek istediğinize emin misiniz?")) {
-                await deleteDoc(doc(db, col, id));
-                if(col === 'tasks') loadTasks(); else loadStoreItems();
-            }
-        }
-    </script>
-</body>
-</html>
+        // --- KANIT ONAY İŞLEMLERİ ---
+        async function loadProofs() {
+            const container = document.getElementById('proof-list-container');
+            container.innerHTML = '<p style="color:#aaa;">Yükleniyor...</p>';
+            
+            // Sadece bekleyenleri getir
+            const q = query(collection(db, "proofs"), where("status", "==", "pending"));
+            const snapshot = await getDocs(q);
+            container.innerHTML = snapshot.empty ? '<p style="color:#aaa;">Bekleyen kanıt yok.</p>' : '';
+            
+            snapshot.forEach(doc => {
+                const proof = doc.data();
+                container.innerHTML += `
+                    <div class="proof-card">
+                        <div class="task-info">
+                            <h4>Görev: ${proof.taskTitle}</h4>
+                            <p>Kullanıcı: ${proof.userEmail} | Kazanç: ${proof.reward} NC</p>
+                        </div>
+                        <img src="${proof.imageUrl}" class="proof-img" onclick="window.open('${proof.imageUrl}', '_blank')" alt="Kanıt SS">
+                        <div class="proof-actions">
+                            <button class="btn-approve" onclick="approveProof('
