@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nahyec Admin Panel</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap');
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #121212; color: white; height: 100vh; overflow: hidden; }
+
+        /* --- GİRİŞ EKRANI --- */
+        #login-screen { display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .login-container { background-color: #1e1e1e; padding: 40px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-align: center; border: 1px solid #333; width: 100%; max-width: 400px; }
+        .login-container h1 { color: #ffcc00; margin-bottom: 10px; font-size: 28px; }
+        .login-container p { color: #aaa; margin-bottom: 30px; }
+        .google-btn { background-color: white; color: #333; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin: 0 auto; transition: 0.3s; width: 100%; }
+        .google-btn:hover { background-color: #ddd; }
+
+        /* --- ANA PANEL (DASHBOARD) --- */
+        #admin-panel { display: none; height: 100vh; display: flex; }
+        
+        /* Sol Menü */
+        .sidebar { width: 250px; background-color: #1a1a1a; border-right: 1px solid #333; display: flex; flex-direction: column; }
+        .sidebar-logo { padding: 20px; font-size: 22px; font-weight: bold; color: #ffcc00; text-align: center; border-bottom: 1px solid #333; letter-spacing: 1px; }
+        .menu-items { flex: 1; padding: 20px 0; overflow-y: auto; }
+        .menu-item { padding: 15px 25px; display: flex; align-items: center; gap: 15px; color: #ccc; text-decoration: none; cursor: pointer; transition: 0.2s; font-size: 15px; }
+        .menu-item:hover, .menu-item.active { background-color: #2a2a2a; color: #ffcc00; border-left: 4px solid #ffcc00; }
+        .logout-btn-sidebar { padding: 20px; border-top: 1px solid #333; color: #ff4444; text-align: center; cursor: pointer; font-weight: bold; }
+        .logout-btn-sidebar:hover { background-color: #2a2a2a; }
+
+        /* Sağ İçerik */
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; background-color: #121212; }
+        .top-bar { background-color: #1a1a1a; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; }
+        .page-title { font-size: 20px; font-weight: 600; }
+        .user-profile { display: flex; align-items: center; gap: 15px; font-size: 14px; color: #aaa; }
+        .user-profile img { width: 35px; height: 35px; border-radius: 50%; border: 2px solid #ffcc00; }
+        .content-area { padding: 30px; }
+        
+        /* Sekmeler */
+        .page-section { display: none; }
+        .page-section.active { display: block; }
+
+        /* İstatistikler */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background-color: #1e1e1e; padding: 25px; border-radius: 10px; border: 1px solid #333; display: flex; flex-direction: column; gap: 10px; }
+        .stat-title { font-size: 14px; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-value { font-size: 32px; font-weight: bold; color: #ffcc00; }
+
+        /* Form ve Butonlar */
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; color: #ccc; font-size: 14px; }
+        .form-group input { width: 100%; padding: 12px; background-color: #2a2a2a; border: 1px solid #444; border-radius: 5px; color: white; font-size: 15px; }
+        .form-group input:focus { outline: none; border-color: #ffcc00; }
+        .btn-primary { background-color: #ffcc00; color: #121212; border: none; padding: 12px 20px; font-size: 16px; font-weight: bold; border-radius: 5px; cursor: pointer; transition: 0.3s; width: 100%; }
+        .btn-primary:hover { background-color: #e6b800; }
+        
+        .content-box { background-color: #1e1e1e; padding: 25px; border-radius: 10px; border: 1px solid #333; margin-bottom: 20px; }
+        .content-box h2 { margin-bottom: 20px; color: #eee; font-size: 18px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+
+        /* Görev Listesi */
+        .task-item { background-color: #2a2a2a; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #ffcc00; }
+        .task-info h4 { font-size: 16px; margin-bottom: 5px; color: #fff; }
+        .task-info p { font-size: 13px; color: #aaa; word-break: break-all; }
+        .task-info span { font-size: 14px; color: #00ff88; font-weight: bold; }
+        .btn-delete { background-color: #ff4444; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold; }
+        .btn-delete:hover { background-color: #cc0000; }
+    </style>
+</head>
+<body>
+
+    <!-- GİRİŞ EKRANI -->
+    <div id="login-screen">
+        <div class="login-container">
+            <h1>👑 Nahyec Admin</h1>
+            <p>Yönetici paneline erişmek için giriş yapın.</p>
+            <button class="google-btn" id="google-login-btn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20" alt="G">
+                Google ile Giriş Yap
+            </button>
+        </div>
+    </div>
+
+    <!-- YÖNETİCİ PANELİ -->
+    <div id="admin-panel">
+        <aside class="sidebar">
+            <div class="sidebar-logo">NAHYEC</div>
+            <nav class="menu-items">
+                <a class="menu-item active" data-target="overview">📊 Genel Bakış</a>
+                <a class="menu-item" data-target="tasks">📝 Görevler</a>
+                <a class="menu-item" data-target="proofs">🖼️ Kanıt Onayları</a>
+                <a class="menu-item" data-target="users">👥 Kullanıcılar</a>
+                <a class="menu-item" data-target="store">🛒 Mağaza & Kodlar</a>
+                <a class="menu-item" data-target="giveaways">🎁 Çekilişler</a>
+            </nav>
+            <div class="logout-btn-sidebar" id="logout-btn">🚪 Çıkış Yap</div>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="page-title" id="current-page-title">Genel Bakış</div>
+                <div class="user-profile">
+                    <span id="user-email">Yükleniyor...</span>
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Profil">
+                </div>
+            </header>
+
+            <div class="content-area">
+                
+                <!-- GENEL BAKIŞ -->
+                <div id="overview" class="page-section active">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <span class="stat-title">Toplam Kullanıcı</span>
+                            <span class="stat-value">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-title">Bekleyen Kanıt</span>
+                            <span class="stat-value" style="color: #ffaa00;">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-title">Dağıtılan NC</span>
+                            <span class="stat-value" style="color: #00ff88;">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GÖREVLER -->
+                <div id="tasks" class="page-section">
+                    <div class="content-box">
+                        <h2>Yeni Görev Ekle</h2>
+                        <form id="add-task-form">
+                            <div class="form-group">
+                                <label>Görev Adı</label>
+                                <input type="text" id="task-title" required placeholder="Örn: YouTube Kanalına Abone Ol">
+                            </div>
+                            <div class="form-group">
+                                <label>Görev Linki</label>
+                                <input type="url" id="task-url" required placeholder="https://...">
+                            </div>
+                            <div class="form-group">
+                                <label>Ödül Miktarı (NC)</label>
+                                <input type="number" id="task-reward" required placeholder="Örn: 100" min="1">
+                            </div>
+                            <button type="submit" class="btn-primary">Görevi Sisteme Ekle</button>
+                        </form>
+                    </div>
+
+                    <div class="content-box">
+                        <h2>Sistemdeki Görevler</h2>
+                        <div id="task-list-container">
+                            <p style="color: #aaa; text-align: center;">Görevler yükleniyor...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DİĞER SAYFALAR (Yakında) -->
+                <div id="proofs" class="page-section"><div class="content-box"><h2>Kanıt Onayları</h2><p>Yakında...</p></div></div>
+                <div id="users" class="page-section"><div class="content-box"><h2>Kullanıcılar</h2><p>Yakında...</p></div></div>
+                <div id="store" class="page-section"><div class="content-box"><h2>Mağaza & Kodlar</h2><p>Yakında...</p></div></div>
+                <div id="giveaways" class="page-section"><div class="content-box"><h2>Çekilişler</h2><p>Yakında...</p></div></div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- FIREBASE BAĞLANTISI VE MANTIK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDPv-tO0JDpsoWctNXKPkEyYejJogS8xqs",
+            authDomain: "nahyec.firebaseapp.com",
+            projectId: "nahyec",
+            storageBucket: "nahyec.firebasestorage.app",
+            messagingSenderId: "48961284640",
+            appId: "1:48961284640:web:33950aab75e5a22d81ea45",
+            measurementId: "G-QFKWN2CFWS"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        const loginScreen = document.getElementById('login-screen');
+        const adminPanel = document.getElementById('admin-panel');
+        const googleLoginBtn = document.getElementById('google-login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const userEmailDisplay = document.getElementById('user-email');
+        const pageTitle = document.getElementById('current-page-title');
+        const menuItems = document.querySelectorAll('.menu-item');
+        const pageSections = document.querySelectorAll('.page-section');
+
+        // Giriş / Çıkış İşlemleri
+        googleLoginBtn.addEventListener('click', () => {
+            signInWithPopup(auth, provider).catch((error) => alert("Giriş hatası: " + error.message));
+        });
+
+        logoutBtn.addEventListener('click', () => { signOut(auth); });
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                loginScreen.style.display = 'none';
+                adminPanel.style.display = 'flex'; 
+                userEmailDisplay.textContent = user.email;
+                loadTasks(); 
+            } else {
+                loginScreen.style.display = 'flex';
+                adminPanel.style.display = 'none';
+            }
+        });
+
+        // Sekme Geçiş Mantığı
+        menuItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                menuItems.forEach(m => m.classList.remove('active'));
+                item.classList.add('active');
+                pageTitle.textContent = item.textContent.replace(/[^a-zA-ZğüşıöçĞÜŞİÖÇ\s]/g, '').trim();
+
+                const targetId = item.getAttribute('data-target');
+                pageSections.forEach(section => {
+                    section.classList.remove('active');
+                    if (section.id === targetId) {
+                        section.classList.add('active');
+                    }
+                });
+
+                if (targetId === 'tasks') {
+                    loadTasks();
+                }
+            });
+        });
+
+        // Görev Ekleme
+        const addTaskForm = document.getElementById('add-task-form');
+        addTaskForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('task-title').value;
+            const url = document.getElementById('task-url').value;
+            const reward = parseInt(document.getElementById('task-reward').value);
+
+            try {
+                await addDoc(collection(db, "tasks"), {
+                    title: title, url: url, reward: reward, createdAt: new Date(), active: true
+                });
+                alert("Harika! Görev başarıyla veritabanına eklendi.");
+                addTaskForm.reset(); 
+                loadTasks(); 
+            } catch (error) {
+                alert("Hata oluştu: " + error.message);
+            }
+        });
+
+        // Görevleri Listeleme
+        const taskListContainer = document.getElementById('task-list-container');
+        async function loadTasks() {
+            taskListContainer.innerHTML = '<p style="color: #aaa; text-align: center;">Yükleniyor...</p>';
+            try {
+                const querySnapshot = await getDocs(collection(db, "tasks"));
+                taskListContainer.innerHTML = ''; 
+                
+                if (querySnapshot.empty) {
+                    taskListContainer.innerHTML = '<p style="color: #aaa; text-align: center;">Henüz hiç görev eklenmemiş.</p>';
+                    return;
+                }
+
+                querySnapshot.forEach((docSnap) => {
+                    const task = docSnap.data();
+                    const taskId = docSnap.id;
+
+                    const taskItem = document.createElement('div');
+                    taskItem.className = 'task-item';
+                    taskItem.innerHTML = `
+                        <div class="task-info">
+                            <h4>${task.title}</h4>
+                            <p>Link: <a href="${task.url}" target="_blank" style="color:#4da6ff;">${task.url}</a></p>
+                            <span>Ödül: ${task.reward} NC</span>
+                        </div>
+                        <button class="btn-delete" onclick="deleteTask('${taskId}')">Sil</button>
+                    `;
+                    taskListContainer.appendChild(taskItem);
+                });
+            } catch (error) {
+                taskListContainer.innerHTML = `<p style="color: #ff4444; text-align: center;">Görevler yüklenirken hata oluştu: ${error.message}</p>`;
+            }
+        }
+
+        // Görev Silme
+        window.deleteTask = async function(taskId) {
+            if (confirm("Bu görevi silmek istediğinize emin misiniz?")) {
+                try {
+                    await deleteDoc(doc(db, "tasks", taskId));
+                    alert("Görev başarıyla silindi.");
+                    loadTasks(); 
+                } catch (error) {
+                    alert("Silme hatası: " + error.message);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
