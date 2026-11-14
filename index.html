@@ -22,6 +22,9 @@
         .login-btn { background-color: #ffcc00; color: #121212; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 5px; cursor: pointer; margin-top: 15px; transition: 0.3s; width: 100%; }
         .login-btn:hover { background-color: #e6b800; }
 
+        /* EKRANDA GÖRÜNECEK HATA MESAJI İÇİN */
+        #error-message { display: none; color: #ff4444; background-color: #2a0000; border: 1px solid #ff4444; padding: 10px; border-radius: 5px; margin-top: 15px; font-size: 14px; font-weight: bold; }
+
         #admin-panel { display: none; height: 100vh; display: flex; }
         .sidebar { width: 250px; background-color: #1a1a1a; border-right: 1px solid #333; display: flex; flex-direction: column; }
         .sidebar-logo { padding: 20px; font-size: 22px; font-weight: bold; color: #ffcc00; text-align: center; border-bottom: 1px solid #333; letter-spacing: 1px; }
@@ -67,7 +70,6 @@
     </style>
 </head>
 <body>
-    <!-- YENİ GİRİŞ EKRANI (E-POSTA & ŞİFRE) -->
     <div id="login-screen">
         <div class="login-container">
             <h1>👑 Nahyec Admin</h1>
@@ -82,10 +84,13 @@
                 <input type="password" id="admin-password" placeholder="••••••••">
             </div>
             <button class="login-btn" id="email-login-btn">Giriş Yap</button>
+            
+            <!-- HATA MESAJI BURADA GÖRÜNECEK -->
+            <div id="error-message"></div>
+            
         </div>
     </div>
     
-    <!-- PANEL KISMI -->
     <div id="admin-panel">
         <aside class="sidebar">
             <div class="sidebar-logo">NAHYEC</div>
@@ -170,7 +175,6 @@
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        // E-posta/Şifre girişi için gerekli modüller
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -196,15 +200,27 @@
         const pageTitle = document.getElementById('current-page-title');
         const menuItems = document.querySelectorAll('.menu-item');
         const pageSections = document.querySelectorAll('.page-section');
+        
+        // HATA MESAJI ELEMANI
+        const errorMsg = document.getElementById('error-message');
 
-        // E-posta ve Şifre ile Giriş Yap
+        // Giriş Yap
         loginBtn.addEventListener('click', () => {
+            errorMsg.style.display = 'none'; // Eski hatayı gizle
             const email = document.getElementById('admin-email').value;
             const password = document.getElementById('admin-password').value;
             
             signInWithEmailAndPassword(auth, email, password)
                 .catch((error) => {
-                    alert("Giriş Hatası: " + error.message);
+                    // Hata olursa ekrana kırmızı yazıyla yazdır
+                    errorMsg.style.display = 'block';
+                    if(error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                        errorMsg.innerText = "Hata: E-posta veya şifre hatalı! Lütfen kontrol edin.";
+                    } else if (error.code === 'auth/invalid-email') {
+                        errorMsg.innerText = "Hata: Geçersiz e-posta formatı.";
+                    } else {
+                        errorMsg.innerText = "Hata: " + error.message;
+                    }
                 });
         });
 
@@ -304,18 +320,4 @@
         }
 
         // --- KANIT ONAY İŞLEMLERİ ---
-        async function loadProofs() {
-            const container = document.getElementById('proof-list-container');
-            container.innerHTML = '<p style="color:#aaa;">Yükleniyor...</p>';
-            const q = query(collection(db, "proofs"), where("status", "==", "pending"));
-            const snapshot = await getDocs(q);
-            container.innerHTML = snapshot.empty ? '<p style="color:#aaa;">Bekleyen kanıt yok.</p>' : '';
-            snapshot.forEach(doc => {
-                const proof = doc.data();
-                container.innerHTML += `
-                    <div class="proof-card">
-                        <div class="task-info">
-                            <h4>Görev: ${proof.taskTitle}</h4>
-                            <p>Kullanıcı: ${proof.userEmail} | Kazanç: ${proof.reward} NC</p>
-                        </div>
-                        <img src="${proof.imageUrl}" class="proof-img" onclick="window.open('${proof.imageUrl}', '_blank')" alt="Kanıt
+        
