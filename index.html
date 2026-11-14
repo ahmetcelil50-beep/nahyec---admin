@@ -199,7 +199,7 @@
 
         auth.signInWithEmailAndPassword(email, password)
             .then(function(userCredential) {
-                // Giriş başarılı, yönlendirme otomatik yapılacak
+                // Giriş başarılı
             })
             .catch(function(error) {
                 errorBox.style.display = 'block';
@@ -367,11 +367,35 @@
             });
         }
 
+        // PUAN YATIRMALI ONAY FONKSİYONU
         function kanitOnayla(proofId) {
             if (confirm("Onaylıyor musunuz?")) {
-                db.collection("proofs").doc(proofId).update({ status: "approved" }).then(function() {
-                    alert("Onaylandı!"); kanitlariYukle();
-                });
+                db.collection("proofs").doc(proofId).get().then(function(doc) {
+                    if (doc.exists) {
+                        var proofData = doc.data();
+                        var userEmail = proofData.userEmail;
+                        var rewardAmount = proofData.reward;
+
+                        // 1. Kanıtı onaylandı yap
+                        db.collection("proofs").doc(proofId).update({ status: "approved" }).then(function() {
+                            
+                            // 2. Kullanıcıyı bul ve puanı yatır
+                            db.collection("users").where("email", "==", userEmail).get().then(function(querySnapshot) {
+                                if (!querySnapshot.empty) {
+                                    var userDocId = querySnapshot.docs[0].id;
+                                    db.collection("users").doc(userDocId).update({
+                                        balance: firebase.firestore.FieldValue.increment(rewardAmount)
+                                    }).then(function() {
+                                        alert("Onaylandı! " + rewardAmount + " NC kullanıcıya yatırıldı.");
+                                        kanitlariYukle();
+                                    });
+                                } else {
+                                    alert("Hata: Kullanıcı bulunamadı!");
+                                }
+                            });
+                        });
+                    }
+                }).catch(function(error) { alert("Hata: " + error.message); });
             }
         }
 
@@ -395,3 +419,4 @@
     </script>
 </body>
 </html>
+    
