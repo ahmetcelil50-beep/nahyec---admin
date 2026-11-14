@@ -67,6 +67,11 @@
                 <div id="user-task-list"></div>
             </div>
 
+            <div id="giveaways-tab" class="page-section">
+                <div class="section-title">🎁 Aktif Çekilişler</div>
+                <div id="user-giveaway-list"></div>
+            </div>
+
             <div id="store-tab" class="page-section">
                 <div class="section-title">Ödül Mağazası</div>
                 <div id="user-store-list"></div>
@@ -80,13 +85,16 @@
             </div>
         </div>
 
+        <!-- ALT MENÜ (Çekilişler Eklendi) -->
         <div class="bottom-nav">
             <button class="nav-item active" onclick="sekmeDegistirUser('tasks-tab', this)"><i>📋</i>Görevler</button>
+            <button class="nav-item" onclick="sekmeDegistirUser('giveaways-tab', this)"><i>🎁</i>Çekiliş</button>
             <button class="nav-item" onclick="sekmeDegistirUser('store-tab', this)"><i>🛒</i>Mağaza</button>
             <button class="nav-item" onclick="sekmeDegistirUser('inventory-tab', this)"><i>🎒</i>Envanter</button>
         </div>
     </div>
 
+    <!-- KANIT YÜKLEME MODALI -->
     <div id="proof-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-title" id="modal-task-title">Görev Adı</div>
@@ -102,7 +110,8 @@
             </div>
         </div>
     </div>
-        <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+        <!-- Firebase Kütüphaneleri -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
@@ -122,10 +131,13 @@
         var db = firebase.firestore();
         var currentUser = null;
 
+        // Modal değişkenleri
         var seciliGorev = "";
         var seciliOdul = 0;
+        var seciliCekilisId = null; // Eğer çekilişe katılıyorsa buraya ID gelecek
         var seciliResimBase64 = "";
 
+        // --- GİRİŞ İŞLEMLERİ ---
         function googleIleGiris() {
             var provider = new firebase.auth.GoogleAuthProvider();
             auth.signInWithPopup(provider).catch(function(error) { alert("Giriş hatası: " + error.message); });
@@ -140,6 +152,7 @@
                 document.getElementById('app-area').style.display = 'flex';
                 kullaniciVerileriniYukle(user.uid, user.email);
                 gorevleriYukleUser();
+                cekilisleriYukleUser();
                 magazayiYukleUser();
             } else {
                 document.getElementById('login-area').style.display = 'flex';
@@ -147,6 +160,7 @@
             }
         });
 
+        // --- SEKME DEĞİŞTİRME ---
         function sekmeDegistirUser(targetId, btn) {
             var navs = document.querySelectorAll('.nav-item');
             for(var i=0; i<navs.length; i++){ navs[i].classList.remove('active'); }
@@ -157,6 +171,7 @@
             if(targetId === 'inventory-tab') envanteriYukle();
         }
 
+        // --- KULLANICI BAKİYESİ ---
         function kullaniciVerileriniYukle(uid, email) {
             db.collection("users").doc(uid).onSnapshot(function(doc) {
                 if (doc.exists) { document.getElementById('user-balance').innerText = doc.data().balance + " NC"; }
@@ -164,6 +179,7 @@
             });
         }
 
+        // --- GÖREVLERİ LİSTELE ---
         function gorevleriYukleUser() {
             var list = document.getElementById('user-task-list');
             list.innerHTML = 'Yükleniyor...';
@@ -171,11 +187,33 @@
                 list.innerHTML = querySnapshot.empty ? '<p>Şu an görev yok.</p>' : '';
                 querySnapshot.forEach(function(doc) {
                     var task = doc.data();
-                    list.innerHTML += `<div class="card"><div class="task-title">${task.title}</div><div class="task-reward">+${task.reward} NC</div><button class="task-btn" onclick="modalAc('${task.title}', ${task.reward})">Görevi Yap ve Kanıt Yükle</button></div>`;
+                    list.innerHTML += `<div class="card"><div class="task-title">${task.title}</div><div class="task-reward">+${task.reward} NC</div><button class="task-btn" onclick="modalAc('${task.title}', ${task.reward}, null)">Görevi Yap ve Kanıt Yükle</button></div>`;
                 });
             });
         }
 
+        // --- ÇEKİLİŞLERİ LİSTELE ---
+        function cekilisleriYukleUser() {
+            var list = document.getElementById('user-giveaway-list');
+            list.innerHTML = 'Yükleniyor...';
+            db.collection("giveaways").where("status", "==", "active").get().then(function(querySnapshot) {
+                list.innerHTML = querySnapshot.empty ? '<p>Şu an aktif çekiliş yok.</p>' : '';
+                querySnapshot.forEach(function(doc) {
+                    var data = doc.data();
+                    var pCount = data.participants ? data.participants.length : 0;
+                    list.innerHTML += `
+                    <div class="card" style="border-left: 4px solid #ff00ff;">
+                        <div class="task-title">🎁 ${data.prize}</div>
+                        <div class="task-reward" style="background: #fce6ff; color: #cc00cc;">Katılım: ${data.cost} NC</div>
+                        <p style="font-size: 13px; color: #666; margin-bottom: 10px;">Şart: ${data.taskTitle}</p>
+                        <p style="font-size: 12px; color: #999; margin-bottom: 10px;">Katılımcı: ${pCount} Kişi</p>
+                        <button class="task-btn" style="background: #ff00ff;" onclick="modalAc('${data.taskTitle}', ${data.cost}, '${doc.id}')">Görevi Yap ve Katıl</button>
+                    </div>`;
+                });
+            });
+        }
+
+        // --- MAĞAZAYI LİSTELE ---
         function magazayiYukleUser() {
             var list = document.getElementById('user-store-list');
             list.innerHTML = 'Yükleniyor...';
@@ -188,6 +226,7 @@
             });
         }
 
+        // --- ENVANTERİ LİSTELE ---
         function envanteriYukle() {
             var list = document.getElementById('user-inventory-list');
             list.innerHTML = 'Yükleniyor...';
@@ -200,8 +239,13 @@
             });
         }
 
-        function modalAc(taskTitle, reward) {
-            seciliGorev = taskTitle; seciliOdul = reward; seciliResimBase64 = "";
+        // --- MODAL İŞLEMLERİ ---
+        function modalAc(taskTitle, amount, giveawayId) {
+            seciliGorev = taskTitle; 
+            seciliOdul = amount; 
+            seciliCekilisId = giveawayId; // Null ise normal görev, doluysa çekiliş
+            seciliResimBase64 = "";
+
             document.getElementById('modal-task-title').innerText = "Görev: " + taskTitle;
             document.getElementById('proof-image-input').value = "";
             document.getElementById('proof-image-preview').style.display = "none";
@@ -212,7 +256,7 @@
 
         function modalKapat() { document.getElementById('proof-modal').style.display = 'none'; }
 
-        // YENİ: Resmi sıkıştıran ve Base64'e çeviren fonksiyon
+        // Resmi sıkıştır ve Base64'e çevir
         function resimOnizle(input) {
             if (input.files && input.files[0]) {
                 var file = input.files[0];
@@ -220,21 +264,14 @@
                 reader.onload = function(e) {
                     var img = new Image();
                     img.onload = function() {
-                        // Canvas oluşturup resmi yeniden boyutlandırıyoruz
                         var canvas = document.createElement('canvas');
                         var ctx = canvas.getContext('2d');
-                        
-                        // Maksimum genişlik 800px, oranı koruyarak yüksekliği hesapla
                         var maxWidth = 800;
                         var scale = Math.min(1, maxWidth / img.width);
                         canvas.width = img.width * scale;
                         canvas.height = img.height * scale;
-                        
                         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        
-                        // JPEG formatında %70 kalitede sıkıştır
                         seciliResimBase64 = canvas.toDataURL('image/jpeg', 0.7);
-                        
                         var preview = document.getElementById('proof-image-preview');
                         preview.src = seciliResimBase64;
                         preview.style.display = "block";
@@ -245,14 +282,37 @@
             }
         }
 
+        // Kanıtı Gönder
         document.getElementById('btn-submit-proof').addEventListener('click', function() {
             if (!seciliResimBase64) { alert("Lütfen önce bir ekran görüntüsü seçin!"); return; }
+            
+            // Eğer çekilişse bakiyeyi kontrol et
+            if (seciliCekilisId) {
+                var bakiyeText = document.getElementById('user-balance').innerText;
+                var bakiye = parseInt(bakiyeText.replace(" NC", ""));
+                if (bakiye < seciliOdul) { // Çekilişte seciliOdul aslında katılım bedelidir
+                    alert("Yetersiz bakiye! Bu çekilişe katılmak için " + seciliOdul + " NC gerekiyor.");
+                    return;
+                }
+            }
+
             this.innerText = "Gönderiliyor..."; this.disabled = true;
-            db.collection("proofs").add({
-                taskTitle: seciliGorev, userEmail: currentUser.email, reward: seciliOdul,
-                imageUrl: seciliResimBase64, status: "pending"
-            }).then(function() {
-                alert("Kanıtınız başarıyla yönetici onayına gönderildi!");
+
+            var proofData = {
+                taskTitle: seciliGorev, 
+                userEmail: currentUser.email, 
+                reward: seciliCekilisId ? 0 : seciliOdul, // Normal görevse ödülü yaz, çekilişse 0
+                imageUrl: seciliResimBase64, 
+                status: "pending"
+            };
+
+            if (seciliCekilisId) {
+                proofData.giveawayId = seciliCekilisId;
+                proofData.cost = seciliOdul;
+            }
+
+            db.collection("proofs").add(proofData).then(function() {
+                alert(seciliCekilisId ? "Çekiliş katılım kanıtınız yönetici onayına gönderildi!" : "Kanıtınız başarıyla yönetici onayına gönderildi!");
                 modalKapat();
             }).catch(function(error) {
                 alert("Hata: " + error.message);
@@ -261,6 +321,7 @@
             });
         });
 
+        // Satın Alma
         function satinAl(productName, price) {
             if (confirm(productName + " ürününü " + price + " NC karşılığında satın almak istiyor musunuz?")) {
                 db.collection("orders").add({ productName: productName, price: price, userEmail: currentUser.email, status: "pending", createdAt: new Date() })
