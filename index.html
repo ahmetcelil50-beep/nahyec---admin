@@ -10,7 +10,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #121212; color: white; height: 100vh; overflow: hidden; }
 
-        /* --- GİRİŞ EKRANI --- */
+        /* Giriş Ekranı */
         #login-screen { display: flex; justify-content: center; align-items: center; height: 100vh; }
         .login-container { background-color: #1e1e1e; padding: 40px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-align: center; border: 1px solid #333; width: 100%; max-width: 400px; }
         .login-container h1 { color: #ffcc00; margin-bottom: 10px; font-size: 28px; }
@@ -18,10 +18,8 @@
         .google-btn { background-color: white; color: #333; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin: 0 auto; transition: 0.3s; width: 100%; }
         .google-btn:hover { background-color: #ddd; }
 
-        /* --- ANA PANEL (DASHBOARD) --- */
+        /* Dashboard */
         #admin-panel { display: none; height: 100vh; display: flex; }
-        
-        /* Sol Menü */
         .sidebar { width: 250px; background-color: #1a1a1a; border-right: 1px solid #333; display: flex; flex-direction: column; }
         .sidebar-logo { padding: 20px; font-size: 22px; font-weight: bold; color: #ffcc00; text-align: center; border-bottom: 1px solid #333; letter-spacing: 1px; }
         .menu-items { flex: 1; padding: 20px 0; overflow-y: auto; }
@@ -30,7 +28,6 @@
         .logout-btn-sidebar { padding: 20px; border-top: 1px solid #333; color: #ff4444; text-align: center; cursor: pointer; font-weight: bold; }
         .logout-btn-sidebar:hover { background-color: #2a2a2a; }
 
-        /* Sağ İçerik */
         .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; background-color: #121212; }
         .top-bar { background-color: #1a1a1a; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; }
         .page-title { font-size: 20px; font-weight: 600; }
@@ -38,7 +35,6 @@
         .user-profile img { width: 35px; height: 35px; border-radius: 50%; border: 2px solid #ffcc00; }
         .content-area { padding: 30px; }
         
-        /* Sekmeler */
         .page-section { display: none; }
         .page-section.active { display: block; }
 
@@ -59,7 +55,7 @@
         .content-box { background-color: #1e1e1e; padding: 25px; border-radius: 10px; border: 1px solid #333; margin-bottom: 20px; }
         .content-box h2 { margin-bottom: 20px; color: #eee; font-size: 18px; border-bottom: 1px solid #333; padding-bottom: 10px; }
 
-        /* Görev Listesi */
+        /* Liste Elemanları */
         .task-item { background-color: #2a2a2a; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #ffcc00; }
         .task-info h4 { font-size: 16px; margin-bottom: 5px; color: #fff; }
         .task-info p { font-size: 13px; color: #aaa; word-break: break-all; }
@@ -70,7 +66,6 @@
 </head>
 <body>
 
-    <!-- GİRİŞ EKRANI -->
     <div id="login-screen">
         <div class="login-container">
             <h1>👑 Nahyec Admin</h1>
@@ -82,7 +77,6 @@
         </div>
     </div>
 
-    <!-- YÖNETİCİ PANELİ -->
     <div id="admin-panel">
         <aside class="sidebar">
             <div class="sidebar-logo">NAHYEC</div>
@@ -108,7 +102,6 @@
 
             <div class="content-area">
                 
-                <!-- GENEL BAKIŞ -->
                 <div id="overview" class="page-section active">
                     <div class="stats-grid">
                         <div class="stat-card">
@@ -126,7 +119,6 @@
                     </div>
                 </div>
 
-                <!-- GÖREVLER -->
                 <div id="tasks" class="page-section">
                     <div class="content-box">
                         <h2>Yeni Görev Ekle</h2>
@@ -155,17 +147,42 @@
                     </div>
                 </div>
 
-                <!-- DİĞER SAYFALAR (Yakında) -->
+                <div id="store" class="page-section">
+                    <div class="content-box">
+                        <h2>Yeni Ürün (Kod) Ekle</h2>
+                        <form id="add-store-form">
+                            <div class="form-group">
+                                <label>Ürün Adı</label>
+                                <input type="text" id="store-title" required placeholder="Örn: 25 TL Play Store Kodu">
+                            </div>
+                            <div class="form-group">
+                                <label>Fiyat (NC)</label>
+                                <input type="number" id="store-price" required placeholder="Örn: 5000" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label>Stok Adedi</label>
+                                <input type="number" id="store-stock" required placeholder="Örn: 10" min="1">
+                            </div>
+                            <button type="submit" class="btn-primary">Ürünü Mağazaya Ekle</button>
+                        </form>
+                    </div>
+
+                    <div class="content-box">
+                        <h2>Mağazadaki Ürünler</h2>
+                        <div id="store-list-container">
+                            <p style="color: #aaa; text-align: center;">Ürünler yükleniyor...</p>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="proofs" class="page-section"><div class="content-box"><h2>Kanıt Onayları</h2><p>Yakında...</p></div></div>
                 <div id="users" class="page-section"><div class="content-box"><h2>Kullanıcılar</h2><p>Yakında...</p></div></div>
-                <div id="store" class="page-section"><div class="content-box"><h2>Mağaza & Kodlar</h2><p>Yakında...</p></div></div>
                 <div id="giveaways" class="page-section"><div class="content-box"><h2>Çekilişler</h2><p>Yakında...</p></div></div>
 
             </div>
         </main>
     </div>
 
-    <!-- FIREBASE BAĞLANTISI VE MANTIK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -195,7 +212,6 @@
         const menuItems = document.querySelectorAll('.menu-item');
         const pageSections = document.querySelectorAll('.page-section');
 
-        // Giriş / Çıkış İşlemleri
         googleLoginBtn.addEventListener('click', () => {
             signInWithPopup(auth, provider).catch((error) => alert("Giriş hatası: " + error.message));
         });
@@ -208,13 +224,13 @@
                 adminPanel.style.display = 'flex'; 
                 userEmailDisplay.textContent = user.email;
                 loadTasks(); 
+                loadStoreItems(); 
             } else {
                 loginScreen.style.display = 'flex';
                 adminPanel.style.display = 'none';
             }
         });
 
-        // Sekme Geçiş Mantığı
         menuItems.forEach(item => {
             item.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -232,11 +248,12 @@
 
                 if (targetId === 'tasks') {
                     loadTasks();
+                } else if (targetId === 'store') {
+                    loadStoreItems();
                 }
             });
         });
 
-        // Görev Ekleme
         const addTaskForm = document.getElementById('add-task-form');
         addTaskForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -256,7 +273,6 @@
             }
         });
 
-        // Görevleri Listeleme
         const taskListContainer = document.getElementById('task-list-container');
         async function loadTasks() {
             taskListContainer.innerHTML = '<p style="color: #aaa; text-align: center;">Yükleniyor...</p>';
@@ -290,7 +306,6 @@
             }
         }
 
-        // Görev Silme
         window.deleteTask = async function(taskId) {
             if (confirm("Bu görevi silmek istediğinize emin misiniz?")) {
                 try {
@@ -302,6 +317,67 @@
                 }
             }
         }
-    </script>
-</body>
-</html>
+
+        const addStoreForm = document.getElementById('add-store-form');
+        addStoreForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('store-title').value;
+            const price = parseInt(document.getElementById('store-price').value);
+            const stock = parseInt(document.getElementById('store-stock').value);
+
+            try {
+                await addDoc(collection(db, "store"), {
+                    title: title, 
+                    price: price, 
+                    stock: stock, 
+                    createdAt: new Date()
+                });
+                alert("Harika! Ürün başarıyla mağazaya eklendi.");
+                addStoreForm.reset(); 
+                loadStoreItems(); 
+            } catch (error) {
+                alert("Hata oluştu: " + error.message);
+            }
+        });
+
+        const storeListContainer = document.getElementById('store-list-container');
+        async function loadStoreItems() {
+            storeListContainer.innerHTML = '<p style="color: #aaa; text-align: center;">Yükleniyor...</p>';
+            try {
+                const querySnapshot = await getDocs(collection(db, "store"));
+                storeListContainer.innerHTML = ''; 
+                
+                if (querySnapshot.empty) {
+                    storeListContainer.innerHTML = '<p style="color: #aaa; text-align: center;">Mağazada henüz ürün yok.</p>';
+                    return;
+                }
+
+                querySnapshot.forEach((docSnap) => {
+                    const item = docSnap.data();
+                    const itemId = docSnap.id;
+
+                    const storeItem = document.createElement('div');
+                    storeItem.className = 'task-item';
+                    storeItem.innerHTML = `
+                        <div class="task-info">
+                            <h4>${item.title}</h4>
+                            <p>Fiyat: ${item.price} NC</p>
+                            <span>Stok: ${item.stock} Adet</span>
+                        </div>
+                        <button class="btn-delete" onclick="deleteStoreItem('${itemId}')">Sil</button>
+                    `;
+                    storeListContainer.appendChild(storeItem);
+                });
+            } catch (error) {
+                storeListContainer.innerHTML = `<p style="color: #ff4444; text-align: center;">Ürünler yüklenirken hata oluştu: ${error.message}</p>`;
+            }
+        }
+
+        window.deleteStoreItem = async function(itemId) {
+            if (confirm("Bu ürünü mağazadan silmek istediğinize emin misiniz?")) {
+                try {
+                    await deleteDoc(doc(db, "store", itemId));
+                    alert("Ürün başarıyla silindi.");
+                    loadStoreItems(); 
+                } catch (error) {
+          
