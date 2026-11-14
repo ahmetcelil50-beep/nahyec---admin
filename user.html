@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nahyec - Kazanmaya Başla</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f4f6f9; color: #333; height: 100vh; display: flex; flex-direction: column; }
+        
+        /* Üst Bar */
+        .header { background-color: #ffcc00; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .header h1 { font-size: 22px; color: #121212; font-weight: 800; }
+        .user-info { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: bold; }
+        .logout-btn { background: #121212; color: white; border: none; padding: 5px 10px; border-radius: 5px; font-size: 12px; cursor: pointer; }
+
+        /* İçerik Alanı */
+        .content { flex: 1; padding: 20px; overflow-y: auto; padding-bottom: 80px; }
+        .page-section { display: none; }
+        .page-section.active { display: block; }
+        
+        .section-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #121212; }
+        
+        /* Kartlar */
+        .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .task-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; }
+        .task-reward { display: inline-block; background: #e6f9f0; color: #00b359; padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; margin-bottom: 10px; }
+        .task-btn { background: #121212; color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        
+        /* Form */
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 14px; color: #666; }
+        .form-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; }
+
+        /* Alt Menü (Navigasyon) */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .nav-item { text-align: center; color: #888; font-size: 12px; cursor: pointer; border: none; background: none; }
+        .nav-item.active { color: #ffcc00; font-weight: bold; }
+        .nav-item i { display: block; font-size: 20px; margin-bottom: 5px; font-style: normal; }
+    </style>
+</head>
+<body>
+
+    <!-- GİRİŞ EKRANI -->
+    <div id="login-area" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; padding: 20px; text-align: center;">
+        <h1 style="font-size: 40px; margin-bottom: 10px;">👑</h1>
+        <h2 style="margin-bottom: 20px;">Nahyec'e Hoş Geldin!</h2>
+        <p style="color: #666; margin-bottom: 30px;">Görevleri yap, NC kazan ve ödüllerini al.</p>
+        <button onclick="googleIleGiris()" style="background: white; border: 1px solid #ddd; padding: 15px 30px; border-radius: 8px; font-weight: bold; font-size: 16px; display: flex; align-items: center; gap: 10px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="24">
+            Google ile Giriş Yap
+        </button>
+    </div>
+
+    <!-- UYGULAMA İÇİ -->
+    <div id="app-area" style="display: none; flex-direction: column; height: 100vh;">
+        
+        <div class="header">
+            <h1>NAHYEC</h1>
+            <div class="user-info">
+                <span id="user-balance">0 NC</span>
+                <button class="logout-btn" onclick="cikisYap()">Çıkış</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- GÖREVLER -->
+            <div id="tasks-tab" class="page-section active">
+                <div class="section-title">Yapılacak Görevler</div>
+                <div id="user-task-list"></div>
+            </div>
+
+            <!-- MAĞAZA -->
+            <div id="store-tab" class="page-section">
+                <div class="section-title">Ödül Mağazası</div>
+                <div id="user-store-list"></div>
+            </div>
+
+            <!-- ENVANTER -->
+            <div id="inventory-tab" class="page-section">
+                <div class="section-title">Envanterim</div>
+                <div id="user-inventory-list">
+                    <p style="color: #666; text-align: center; margin-top: 20px;">Henüz bir kodun yok.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ALT MENÜ -->
+        <div class="bottom-nav">
+            <button class="nav-item active" onclick="sekmeDegistirUser('tasks-tab', this)"><i>📋</i>Görevler</button>
+            <button class="nav-item" onclick="sekmeDegistirUser('store-tab', this)"><i>🛒</i>Mağaza</button>
+            <button class="nav-item" onclick="sekmeDegistirUser('inventory-tab', this)"><i>🎒</i>Envanter</button>
+        </div>
+    </div>
+        <!-- Firebase Kütüphaneleri -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script>
+        var firebaseConfig = {
+            apiKey: "AIzaSyDPv-tO0JDpsoWctNXKPkEyYejJogS8xqs",
+            authDomain: "nahyec.firebaseapp.com",
+            projectId: "nahyec",
+            storageBucket: "nahyec.firebasestorage.app",
+            messagingSenderId: "48961284640",
+            appId: "1:48961284640:web:33950aab75e5a22d81ea45",
+            measurementId: "G-QFKWN2CFWS"
+        };
+        
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        var auth = firebase.auth();
+        var db = firebase.firestore();
+        var currentUser = null;
+
+        // --- GİRİŞ İŞLEMLERİ ---
+        function googleIleGiris() {
+            var provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider).catch(function(error) {
+                alert("Giriş hatası: " + error.message);
+            });
+        }
+
+        function cikisYap() {
+            auth.signOut();
+        }
+
+        auth.onAuthStateChanged(function(user) {
+            if (user) {
+                currentUser = user;
+                document.getElementById('login-area').style.display = 'none';
+                document.getElementById('app-area').style.display = 'flex';
+                kullaniciVerileriniYukle(user.uid, user.email);
+                gorevleriYukleUser();
+                magazayiYukleUser();
+            } else {
+                document.getElementById('login-area').style.display = 'flex';
+                document.getElementById('app-area').style.display = 'none';
+            }
+        });
+
+        // --- SEKME DEĞİŞTİRME ---
+        function sekmeDegistirUser(targetId, btn) {
+            var navs = document.querySelectorAll('.nav-item');
+            for(var i=0; i<navs.length; i++){ navs[i].classList.remove('active'); }
+            btn.classList.add('active');
+            
+            var sections = document.querySelectorAll('.page-section');
+            for(var j=0; j<sections.length; j++){ sections[j].classList.remove('active'); }
+            document.getElementById(targetId).classList.add('active');
+            
+            if(targetId === 'inventory-tab') envanteriYukle();
+        }
+
+        // --- KULLANICI BAKİYESİ ---
+        function kullaniciVerileriniYukle(uid, email) {
+            db.collection("users").doc(uid).get().then(function(doc) {
+                if (doc.exists) {
+                    document.getElementById('user-balance').innerText = doc.data().balance + " NC";
+                } else {
+                    db.collection("users").doc(uid).set({ email: email, balance: 0 });
+                    document.getElementById('user-balance').innerText = "0 NC";
+                }
+            });
+        }
+
+        // --- GÖREVLERİ LİSTELE ---
+        function gorevleriYukleUser() {
+            var list = document.getElementById('user-task-list');
+            list.innerHTML = 'Yükleniyor...';
+            db.collection("tasks").get().then(function(querySnapshot) {
+                list.innerHTML = querySnapshot.empty ? '<p>Şu an görev yok.</p>' : '';
+                querySnapshot.forEach(function(doc) {
+                    var task = doc.data();
+                    list.innerHTML += `
+                    <div class="card">
+                        <div class="task-title">${task.title}</div>
+                        <div class="task-reward">+${task.reward} NC</div>
+                        <button class="task-btn" onclick="kanitYukleEkrani('${task.title}', ${task.reward})">Görevi Yap ve Kanıt Yükle</button>
+                    </div>`;
+                });
+            });
+        }
+
+        // --- MAĞAZAYI LİSTELE ---
+        function magazayiYukleUser() {
+            var list = document.getElementById('user-store-list');
+            list.innerHTML = 'Yükleniyor...';
+            db.collection("store").get().then(function(querySnapshot) {
+                list.innerHTML = querySnapshot.empty ? '<p>Şu an ürün yok.</p>' : '';
+                querySnapshot.forEach(function(doc) {
+                    var item = doc.data();
+                    list.innerHTML += `
+                    <div class="card">
+                        <div class="task-title">${item.title}</div>
+                        <div class="task-reward" style="background: #fff0e6; color: #ff6600;">Fiyat: ${item.price} NC</div>
+                        <p style="font-size: 12px; color: #666; margin-bottom: 10px;">Kalan Stok: ${item.stock}</p>
+                        <button class="task-btn" onclick="satinAl('${item.title}', ${item.price})">Satın Al</button>
+                    </div>`;
+                });
+            });
+        }
+
+        // --- ENVANTERİ LİSTELE ---
+        function envanteriYukle() {
+            var list = document.getElementById('user-inventory-list');
+            list.innerHTML = 'Yükleniyor...';
+            db.collection("orders").where("userEmail", "==", currentUser.email).where("status", "==", "completed").get().then(function(querySnapshot) {
+                list.innerHTML = querySnapshot.empty ? '<p style="color: #666; text-align: center;">Henüz bir kodun yok.</p>' : '';
+                querySnapshot.forEach(function(doc) {
+                    var order = doc.data();
+                    list.innerHTML += `
+                    <div class="card">
+                        <div class="task-title">${order.productName}</div>
+                        <div style="background: #eee; padding: 10px; border-radius: 5px; font-family: monospace; text-align: center; margin-top: 10px;">
+                            ${order.deliveredCode}
+                        </div>
+                    </div>`;
+                });
+            });
+        }
+
+        // --- KANIT YÜKLEME ---
+        function kanitYukleEkrani(taskTitle, reward) {
+            var imageUrl = prompt("Lütfen yaptığınız görevin Ekran Görüntüsü (SS) linkini buraya yapıştırın:");
+            if (imageUrl) {
+                db.collection("proofs").add({
+                    taskTitle: taskTitle,
+                    userEmail: currentUser.email,
+                    reward: reward,
+                    imageUrl: imageUrl,
+                    status: "pending"
+                }).then(function() {
+                    alert("Kanıtınız yönetici onayına gönderildi!");
+                }).catch(function(error) {
+                    alert("Hata: " + error.message);
+                });
+            }
+        }
+
+        // --- SATIN ALMA ---
+        function satinAl(productName, price) {
+            if (confirm(productName + " ürününü " + price + " NC karşılığında satın almak istiyor musunuz?")) {
+                db.collection("orders").add({
+                    productName: productName,
+                    price: price,
+                    userEmail: currentUser.email,
+                    status: "pending",
+                    createdAt: new Date()
+                }).then(function() {
+                    alert("Siparişiniz alındı! Yönetici onayından sonra kodunuz envanterinize düşecek.");
+                }).catch(function(error) {
+                    alert("Hata: " + error.message);
+                });
+            }
+        }
+    </script>
+</body>
+</html>
