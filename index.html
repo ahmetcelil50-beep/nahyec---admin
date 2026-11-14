@@ -8,12 +8,17 @@
         @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #121212; color: white; height: 100vh; overflow: hidden; }
+        
+        /* Giriş Ekranı */
         #login-screen { display: flex; justify-content: center; align-items: center; height: 100vh; }
         .login-container { background-color: #1e1e1e; padding: 40px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-align: center; border: 1px solid #333; width: 100%; max-width: 400px; }
         .login-container h1 { color: #ffcc00; margin-bottom: 10px; font-size: 28px; }
         .login-container p { color: #aaa; margin-bottom: 30px; }
         .google-btn { background-color: white; color: #333; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin: 0 auto; transition: 0.3s; width: 100%; }
         .google-btn:hover { background-color: #ddd; }
+        #loading-text { display: none; margin-top: 15px; color: #ffcc00; font-size: 14px; }
+
+        /* Dashboard */
         #admin-panel { display: none; height: 100vh; display: flex; }
         .sidebar { width: 250px; background-color: #1a1a1a; border-right: 1px solid #333; display: flex; flex-direction: column; }
         .sidebar-logo { padding: 20px; font-size: 22px; font-weight: bold; color: #ffcc00; text-align: center; border-bottom: 1px solid #333; letter-spacing: 1px; }
@@ -74,6 +79,7 @@
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20" alt="G">
                 Google ile Giriş Yap
             </button>
+            <div id="loading-text">Google'a yönlendiriliyorsunuz, lütfen bekleyin...</div>
         </div>
     </div>
     <div id="admin-panel">
@@ -82,7 +88,6 @@
             <nav class="menu-items">
                 <a class="menu-item active" data-target="overview">📊 Genel Bakış</a>
                 <a class="menu-item" data-target="tasks">📝 Görevler</a>
-                <!-- YENİ: Kanıt Onayları -->
                 <a class="menu-item" data-target="proofs">🖼️ Kanıt Onayları</a>
                 <a class="menu-item" data-target="users">👥 Kullanıcılar</a>
                 <a class="menu-item" data-target="store">🛒 Mağaza & Kodlar</a>
@@ -147,11 +152,9 @@
                     </div>
                 </div>
 
-                <!-- KANIT ONAYLARI SAYFASI -->
                 <div id="proofs" class="page-section">
                     <div class="content-box">
                         <h2>Bekleyen Görev Kanıtları (SS)</h2>
-                        <p style="color:#aaa; font-size:14px; margin-bottom:15px;">Kullanıcıların görev yapıp yüklediği ekran görüntüleri buraya düşer. İnceleyip Onayla veya Reddet deyin.</p>
                         <div id="proof-list-container"></div>
                     </div>
                 </div>
@@ -163,7 +166,8 @@
     </div>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        // DİKKAT: signInWithRedirect ve getRedirectResult kullanıyoruz
+        import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -189,9 +193,27 @@
         const pageTitle = document.getElementById('current-page-title');
         const menuItems = document.querySelectorAll('.menu-item');
         const pageSections = document.querySelectorAll('.page-section');
+        const loadingText = document.getElementById('loading-text');
 
+        // Google'dan döndükten sonra sonucu kontrol et
+        getRedirectResult(auth)
+            .then((result) => {
+                if (result) {
+                    console.log("Giriş başarılı:", result.user.email);
+                }
+            })
+            .catch((error) => {
+                alert("Giriş Hatası: " + error.message);
+                loadingText.style.display = 'none';
+            });
+
+        // Butona basınca yönlendir
         googleLoginBtn.addEventListener('click', () => {
-            signInWithPopup(auth, provider).catch((error) => alert("Hata: " + error.message));
+            loadingText.style.display = 'block'; // Kullanıcıya beklemesini söyle
+            signInWithRedirect(auth, provider).catch((error) => {
+                alert("Yönlendirme Hatası: " + error.message);
+                loadingText.style.display = 'none';
+            });
         });
 
         logoutBtn.addEventListener('click', () => { signOut(auth); });
@@ -205,6 +227,7 @@
             } else {
                 loginScreen.style.display = 'flex';
                 adminPanel.style.display = 'none';
+                loadingText.style.display = 'none';
             }
         });
 
@@ -219,7 +242,7 @@
                 if (targetId === 'tasks') loadTasks();
                 else if (targetId === 'store') loadStoreItems();
                 else if (targetId === 'orders') loadOrders();
-                else if (targetId === 'proofs') loadProofs(); // Kanıtları yükle
+                else if (targetId === 'proofs') loadProofs();
             });
         });
 
@@ -290,20 +313,6 @@
         async function loadProofs() {
             const container = document.getElementById('proof-list-container');
             container.innerHTML = '<p style="color:#aaa;">Yükleniyor...</p>';
-            
-            // Sadece bekleyenleri getir
             const q = query(collection(db, "proofs"), where("status", "==", "pending"));
             const snapshot = await getDocs(q);
-            container.innerHTML = snapshot.empty ? '<p style="color:#aaa;">Bekleyen kanıt yok.</p>' : '';
-            
-            snapshot.forEach(doc => {
-                const proof = doc.data();
-                container.innerHTML += `
-                    <div class="proof-card">
-                        <div class="task-info">
-                            <h4>Görev: ${proof.taskTitle}</h4>
-                            <p>Kullanıcı: ${proof.userEmail} | Kazanç: ${proof.reward} NC</p>
-                        </div>
-                        <img src="${proof.imageUrl}" class="proof-img" onclick="window.open('${proof.imageUrl}', '_blank')" alt="Kanıt SS">
-                        <div class="proof-actions">
-                            <button class="btn-approve" onclick="approveProof('
+            container.innerHTML = snapshot.empty ? '<p style
