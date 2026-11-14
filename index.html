@@ -95,6 +95,7 @@
                 <button class="menu-item active" onclick="sekmeDegistir('overview', this)">📊 Genel Bakış</button>
                 <button class="menu-item" onclick="sekmeDegistir('tasks', this)">📝 Görevler</button>
                 <button class="menu-item" onclick="sekmeDegistir('proofs', this)">🖼️ Kanıt Onayları</button>
+                <button class="menu-item" onclick="sekmeDegistir('users', this)">👥 Kullanıcılar</button>
                 <button class="menu-item" onclick="sekmeDegistir('store', this)">🛒 Mağaza & Kodlar</button>
                 <button class="menu-item" onclick="sekmeDegistir('orders', this)">📦 Siparişler</button>
             </nav>
@@ -112,9 +113,18 @@
                 <!-- GENEL BAKIŞ -->
                 <div id="overview" class="page-section active">
                     <div class="stats-grid">
-                        <div class="stat-card"><span class="stat-title">Toplam Kullanıcı</span><span class="stat-value">0</span></div>
-                        <div class="stat-card"><span class="stat-title">Bekleyen Kanıt</span><span class="stat-value" style="color: #ffaa00;">0</span></div>
-                        <div class="stat-card"><span class="stat-title">Dağıtılan NC</span><span class="stat-value" style="color: #00ff88;">0</span></div>
+                        <div class="stat-card">
+                            <span class="stat-title">Toplam Kullanıcı</span>
+                            <span class="stat-value" id="stat-total-users">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-title">Bekleyen Kanıt</span>
+                            <span class="stat-value" id="stat-pending-proofs" style="color: #ffaa00;">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-title">Dağıtılan NC</span>
+                            <span class="stat-value" id="stat-distributed-nc" style="color: #00ff88;">0</span>
+                        </div>
                     </div>
                 </div>
                 
@@ -130,6 +140,14 @@
                     <div class="content-box">
                         <h2>Sistemdeki Görevler</h2>
                         <div id="task-list"></div>
+                    </div>
+                </div>
+
+                <!-- KULLANICILAR (YENİ) -->
+                <div id="users" class="page-section">
+                    <div class="content-box">
+                        <h2>Kayıtlı Kullanıcılar</h2>
+                        <div id="user-list"></div>
                     </div>
                 </div>
 
@@ -198,15 +216,11 @@
         errorBox.style.display = 'none';
 
         auth.signInWithEmailAndPassword(email, password)
-            .then(function(userCredential) {
-                // Giriş başarılı
-            })
+            .then(function(userCredential) { })
             .catch(function(error) {
                 errorBox.style.display = 'block';
                 if(error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
                     errorBox.innerText = "HATA: E-posta veya şifre hatalı!";
-                } else if (error.code === 'auth/invalid-email') {
-                    errorBox.innerText = "HATA: Geçersiz e-posta formatı.";
                 } else {
                     errorBox.innerText = "HATA: " + error.message;
                 }
@@ -227,7 +241,11 @@
             loginScreen.style.display = 'none';
             adminPanel.style.display = 'flex';
             document.getElementById('user-email').innerText = user.email;
+            
+            // Sayfa açıldığında her şeyi yükle
+            istatistikleriYukle();
             gorevleriYukle();
+            kullanicilariYukle();
             magazayiYukle();
             siparisleriYukle();
         } else {
@@ -248,10 +266,51 @@
         for(var j=0; j<sections.length; j++){ sections[j].classList.remove('active'); }
         document.getElementById(targetId).classList.add('active');
 
-        if (targetId === 'tasks') gorevleriYukle();
+        if (targetId === 'overview') istatistikleriYukle();
+        else if (targetId === 'tasks') gorevleriYukle();
+        else if (targetId === 'users') kullanicilariYukle();
         else if (targetId === 'store') magazayiYukle();
         else if (targetId === 'orders') siparisleriYukle();
         else if (targetId === 'proofs') kanitlariYukle();
+    }
+
+    // --- İSTATİSTİKLERİ YÜKLE (GENEL BAKIŞ) ---
+    function istatistikleriYukle() {
+        // Toplam Kullanıcı
+        db.collection("users").get().then(function(snapshot) {
+            document.getElementById('stat-total-users').innerText = snapshot.size;
+            
+            // Toplam Dağıtılan NC'yi hesapla
+            var totalNC = 0;
+            snapshot.forEach(function(doc) {
+                if(doc.data().balance) totalNC += doc.data().balance;
+            });
+            document.getElementById('stat-distributed-nc').innerText = totalNC + " NC";
+        });
+
+        // Bekleyen Kanıtlar
+        db.collection("proofs").where("status", "==", "pending").get().then(function(snapshot) {
+            document.getElementById('stat-pending-proofs').innerText = snapshot.size;
+        });
+    }
+
+    // --- KULLANICILARI YÜKLE ---
+    function kullanicilariYukle() {
+        var list = document.getElementById('user-list');
+        list.innerHTML = 'Yükleniyor...';
+        db.collection("users").get().then(function(querySnapshot) {
+            list.innerHTML = querySnapshot.empty ? 'Kayıtlı kullanıcı yok.' : '';
+            querySnapshot.forEach(function(doc) {
+                var user = doc.data();
+                list.innerHTML += `
+                <div class="list-item">
+                    <div class="item-info">
+                        <h4>${user.email}</h4>
+                        <span>Bakiye: ${user.balance} NC</span>
+                    </div>
+                </div>`;
+            });
+        });
     }
             // --- GÖREV İŞLEMLERİ ---
         function gorevEkle() {
@@ -367,7 +426,7 @@
             });
         }
 
-        // PUAN YATIRMALI ONAY FONKSİYONU
+        // PUAN YATIRMALI ONAY (En kritik yer)
         function kanitOnayla(proofId) {
             if (confirm("Onaylıyor musunuz?")) {
                 db.collection("proofs").doc(proofId).get().then(function(doc) {
@@ -376,10 +435,7 @@
                         var userEmail = proofData.userEmail;
                         var rewardAmount = proofData.reward;
 
-                        // 1. Kanıtı onaylandı yap
                         db.collection("proofs").doc(proofId).update({ status: "approved" }).then(function() {
-                            
-                            // 2. Kullanıcıyı bul ve puanı yatır
                             db.collection("users").where("email", "==", userEmail).get().then(function(querySnapshot) {
                                 if (!querySnapshot.empty) {
                                     var userDocId = querySnapshot.docs[0].id;
@@ -388,6 +444,7 @@
                                     }).then(function() {
                                         alert("Onaylandı! " + rewardAmount + " NC kullanıcıya yatırıldı.");
                                         kanitlariYukle();
+                                        istatistikleriYukle(); // İstatistikleri güncelle
                                     });
                                 } else {
                                     alert("Hata: Kullanıcı bulunamadı!");
@@ -419,4 +476,3 @@
     </script>
 </body>
 </html>
-    
