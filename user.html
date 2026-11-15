@@ -31,6 +31,7 @@
         .nav-item.active { color: #ffcc00; font-weight: bold; }
         .nav-item i { display: block; font-size: 18px; margin-bottom: 4px; font-style: normal; }
 
+        /* Liderlik Tablosu */
         .lb-item { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 4px solid #ccc;}
         .lb-item.top-1 { border-left: 4px solid #ffd700; background: #fffdf5; }
         .lb-item.top-2 { border-left: 4px solid #c0c0c0; background: #fafafa; }
@@ -43,6 +44,7 @@
         .lb-item.top-2 .lb-rank { color: #c0c0c0; }
         .lb-item.top-3 .lb-rank { color: #cd7f32; }
 
+        /* Görev Detay Sayfası */
         #task-detail-page { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f4f6f9; z-index: 2000; flex-direction: column; overflow-y: auto; }
         .detail-header { background: #121212; color: white; padding: 20px; display: flex; align-items: center; gap: 15px; }
         .back-btn { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
@@ -57,6 +59,7 @@
         #detail-image-preview { width: 100%; max-height: 250px; object-fit: contain; border-radius: 8px; display: none; margin-bottom: 15px; border: 1px solid #ddd; }
         .submit-proof-btn { background: #00ff88; color: #121212; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
 
+        /* Profil */
         .profile-info { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .profile-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         .profile-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
@@ -69,6 +72,12 @@
         .status-bekliyor { color: #ffaa00; font-weight: bold; }
         .status-onaylandi { color: #00b359; font-weight: bold; }
         .status-reddedildi { color: #ff4444; font-weight: bold; }
+
+        /* Son Satın Alımlar Stili */
+        .recent-purchase-item { display: flex; justify-content: space-between; align-items: center; background: #f9f9f9; padding: 10px 15px; border-radius: 8px; margin-bottom: 10px; border-left: 3px solid #00b359; font-size: 13px;}
+        .rp-user { font-weight: bold; color: #333; }
+        .rp-product { color: #666; }
+        .rp-time { color: #999; font-size: 11px; }
     </style>
 </head>
 <body>
@@ -111,10 +120,16 @@
                 <div id="user-giveaway-list"></div>
             </div>
 
-            <!-- MAĞAZA -->
+            <!-- MAĞAZA (Son Satın Alımlar Eklendi) -->
             <div id="store-tab" class="page-section">
                 <div class="section-title">Ödül Mağazası</div>
                 <div id="user-store-list"></div>
+                
+                <!-- YENİ: SON SATIN ALIMLAR -->
+                <div class="section-title" style="margin-top: 30px;">🛒 Son Satın Alımlar</div>
+                <div id="recent-purchases-list">
+                    <p style="color: #666; text-align: center;">Yükleniyor...</p>
+                </div>
             </div>
 
             <!-- ENVANTER -->
@@ -260,6 +275,7 @@
             gorevleriYukleUser();
             cekilisleriYukleUser();
             magazayiYukleUser();
+            sonSatinAlimlariYukle(); // Yeni eklendi
             liderlikTablosunuYukleUser();
         } else {
             document.getElementById('login-area').style.display = 'flex';
@@ -279,6 +295,7 @@
         if(targetId === 'inventory-tab') envanteriYukle();
         else if(targetId === 'profile-tab') profilYukle();
         else if(targetId === 'leaderboard-tab') liderlikTablosunuYukleUser();
+        else if(targetId === 'store-tab') sonSatinAlimlariYukle(); // Yeni eklendi
     }
 
     // --- LİDERLİK TABLOSU (KULLANICI TARAFI) ---
@@ -409,7 +426,51 @@ function envanteriYukle() {
             list.innerHTML += `<div class="card"><div class="task-title">${order.productName}</div><div style="background: #eee; padding: 10px; border-radius: 5px; font-family: monospace; text-align: center; margin-top: 10px;">${order.deliveredCode}</div></div>`;
         });
     });
-    }
+}
+
+// --- SON SATIN ALIMLARI LİSTELE ---
+function sonSatinAlimlariYukle() {
+    var list = document.getElementById('recent-purchases-list');
+    list.innerHTML = 'Yükleniyor...';
+    
+    db.collection("orders").where("status", "==", "completed").orderBy("createdAt", "desc").limit(10).get().then(function(querySnapshot) {
+        list.innerHTML = querySnapshot.empty ? '<p style="color:#666; text-align:center;">Henüz bir satın alma yok.</p>' : '';
+        
+        querySnapshot.forEach(function(doc) {
+            var order = doc.data();
+            var email = order.userEmail || "Gizli";
+            var maskedEmail = email.substring(0, 3) + "***" + email.substring(email.indexOf('@'));
+            var timeAgo = zamanFarkiHesapla(order.createdAt);
+            
+            list.innerHTML += `
+            <div class="recent-purchase-item">
+                <div>
+                    <span class="rp-user">${maskedEmail}</span>
+                    <span class="rp-product"> - ${order.productName}</span>
+                </div>
+                <span class="rp-time">${timeAgo}</span>
+            </div>`;
+        });
+    }).catch(function(error) {
+        list.innerHTML = '<p style="color:#666; text-align:center;">Son alımlar yüklenemedi.</p>';
+    });
+}
+
+// Zaman Farkı Hesaplama
+function zamanFarkiHesapla(timestamp) {
+    if (!timestamp) return "Bilinmiyor";
+    var now = new Date();
+    var date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    var diffInSeconds = Math.floor((now - date) / 1000);
+    
+    if (diffInSeconds < 60) return "Az önce";
+    var diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) return diffInMinutes + " dakika önce";
+    var diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return diffInHours + " saat önce";
+    var diffInDays = Math.floor(diffInHours / 24);
+    return diffInDays + " gün önce";
+}
             // --- PROFİL SAYFASI İŞLEMLERİ ---
         function profilYukle() {
             document.getElementById('profile-email').innerText = currentUser.email;
@@ -528,7 +589,7 @@ function envanteriYukle() {
         function satinAl(productName, price) {
             if (confirm(productName + " ürününü " + price + " NC karşılığında satın almak istiyor musunuz?")) {
                 db.collection("orders").add({ productName: productName, price: price, userEmail: currentUser.email, status: "pending", createdAt: new Date() })
-                .then(function() { alert("Siparişiniz alındı!"); });
+                .then(function() { alert("Siparişiniz alındı! Mağaza sayfasının altındaki 'Son Satın Alımlar' listesinde görebilirsiniz."); });
             }
         }
     </script>
