@@ -7,15 +7,20 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f4f6f9; color: #333; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        .header { background-color: #ffcc00; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 10; }
+        /* KAYDIRMA SORUNU ÇÖZÜLDÜ */
+        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
+        body { background-color: #f4f6f9; color: #333; display: flex; flex-direction: column; }
+        
+        .header { background-color: #ffcc00; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 10; flex-shrink: 0; }
         .header h1 { font-size: 22px; color: #121212; font-weight: 800; }
         .user-info { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: bold; }
         .balance-box { display: flex; flex-direction: column; align-items: flex-end; font-size: 11px; line-height: 1.2; }
         .logout-btn { background: #121212; color: white; border: none; padding: 5px 10px; border-radius: 5px; font-size: 12px; cursor: pointer; }
 
-        .content { flex: 1; padding: 20px; overflow-y: auto; padding-bottom: 80px; }
+        /* KAYDIRMA SORUNU ÇÖZÜLDÜ */
+        .content { flex: 1; padding: 20px; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 90px; }
+        
         .page-section { display: none; height: 100%; }
         .page-section.active { display: block; }
         
@@ -32,6 +37,7 @@
         .nav-item i { display: block; font-size: 18px; margin-bottom: 4px; font-style: normal; }
 
         /* Liderlik Tablosu */
+        .lb-timer { background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; margin-bottom: 15px; border: 1px solid #ffeeba; }
         .lb-item { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 4px solid #ccc;}
         .lb-item.top-1 { border-left: 4px solid #ffd700; background: #fffdf5; }
         .lb-item.top-2 { border-left: 4px solid #c0c0c0; background: #fafafa; }
@@ -46,13 +52,14 @@
 
         /* Görev Detay Sayfası */
         #task-detail-page { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f4f6f9; z-index: 2000; flex-direction: column; overflow-y: auto; }
-        .detail-header { background: #121212; color: white; padding: 20px; display: flex; align-items: center; gap: 15px; }
+        .detail-header { background: #121212; color: white; padding: 20px; display: flex; align-items: center; gap: 15px; position: sticky; top: 0; z-index: 10;}
         .back-btn { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
-        .detail-content { padding: 20px; }
+        .detail-content { padding: 20px; padding-bottom: 50px;}
         .detail-title { font-size: 22px; font-weight: bold; margin-bottom: 10px; color: #121212; }
         .detail-reward { background: #e6f9f0; color: #00b359; padding: 8px 15px; border-radius: 20px; font-weight: bold; display: inline-block; margin-bottom: 20px; }
         .instruction-box { background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 4px solid #ffcc00; }
         .task-link-btn { display: block; text-align: center; background: #4da6ff; color: white; text-decoration: none; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 16px; margin-bottom: 20px; }
+        .report-btn { display: block; width: 100%; text-align: center; background: none; border: 1px solid #ff4444; color: #ff4444; padding: 10px; border-radius: 8px; font-weight: bold; margin-bottom: 20px; cursor: pointer; }
         .upload-area { background: white; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .upload-input { display: none; }
         .upload-label { display: block; padding: 40px 20px; border: 2px dashed #ccc; border-radius: 8px; cursor: pointer; color: #888; margin-bottom: 15px; }
@@ -78,6 +85,12 @@
         .rp-user { font-weight: bold; color: #333; }
         .rp-product { color: #666; }
         .rp-time { color: #999; font-size: 11px; }
+
+        /* Envanter Kopyalama */
+        .inventory-code-box { background: #eee; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-top: 10px; cursor: pointer; border: 1px dashed #bbb; transition: 0.2s; }
+        .inventory-code-box:active { background: #ddd; }
+        .code-text { font-family: monospace; font-size: 16px; font-weight: bold; color: #333; }
+        .copy-icon { font-size: 18px; color: #666; }
     </style>
 </head>
 <body>
@@ -101,7 +114,7 @@
             <div class="user-info">
                 <div class="balance-box">
                     <span id="user-balance">0 NC</span>
-                    <span id="user-score" style="color:#b37700;">Skor: 0</span>
+                    <span id="user-task-count" style="color:#b37700;">Görev: 0</span>
                 </div>
                 <button class="logout-btn" onclick="cikisYap()">Çıkış</button>
             </div>
@@ -142,6 +155,10 @@
             <!-- LİDERLİK TABLOSU -->
             <div id="leaderboard-tab" class="page-section">
                 <div class="section-title">🏆 Aylık Liderlik Tablosu (İlk 100)</div>
+                
+                <!-- GERİ SAYIM SAYACI -->
+                <div class="lb-timer" id="countdown-timer">Sıfırlanmaya Kalan Süre: Hesaplanıyor...</div>
+                
                 <p style="font-size: 12px; color: #666; margin-bottom: 15px;">En çok görev yapanlar burada. Ay sonunda ilk 3'e ödül var!</p>
                 <div id="user-leaderboard-list"></div>
             </div>
@@ -152,7 +169,7 @@
                 <div class="profile-info">
                     <div class="profile-row"><span>E-posta:</span> <b id="profile-email">-</b></div>
                     <div class="profile-row"><span>Bakiye (NC):</span> <b id="profile-balance" style="color:#00b359;">0 NC</b></div>
-                    <div class="profile-row"><span>Liderlik Skoru:</span> <b id="profile-score" style="color:#ffaa00;">0</b></div>
+                    <div class="profile-row"><span>Tamamlanan Görev:</span> <b id="profile-task-count" style="color:#ffaa00;">0</b></div>
                 </div>
 
                 <div class="section-title" style="font-size:16px; margin-top:20px;">📢 Davet Et, Kazan!</div>
@@ -173,7 +190,7 @@
                 </div>
 
                 <div class="section-title" style="font-size:16px; margin-top:20px;">⚙️ Ayarlar</div>
-                <div class="profile-info">
+                <div class="profile-info" style="margin-bottom: 30px;">
                     <button class="task-btn" style="background:#4da6ff;" onclick="destekTalebiAc()">📞 Destek / Şikayet Bildir</button>
                     <button class="danger-btn" onclick="hesabiSil()">Hesabımı Sil</button>
                 </div>
@@ -205,6 +222,10 @@
                 <p id="detail-task-instruction">Talimatlar burada görünecek.</p>
             </div>
             <a href="#" target="_blank" class="task-link-btn" id="detail-task-link">🔗 Göreve Git</a>
+            
+            <!-- SORUN BİLDİR BUTONU -->
+            <button class="report-btn" onclick="sorunBildir()">⚠️ Link Çalışmıyor mu? Sorun Bildir</button>
+
             <div class="upload-area">
                 <h3 style="margin-bottom: 15px; font-size: 16px;">📸 Kanıt Yükle</h3>
                 <label for="detail-file-input" class="upload-label" id="upload-label">Resim Seçmek İçin Tıkla</label>
@@ -234,6 +255,7 @@
     var auth = firebase.auth();
     var db = firebase.firestore();
     var currentUser = null;
+    var countdownInterval = null;
 
     var seciliGorev = "";
     var seciliOdul = 0;
@@ -253,20 +275,20 @@
             document.getElementById('login-area').style.display = 'none';
             document.getElementById('app-area').style.display = 'flex';
             
-            // Kullanıcının anlık verilerini dinle (Bakiye ve Skor)
+            // Kullanıcının anlık verilerini dinle (Bakiye ve Görev Sayısı)
             db.collection("users").doc(user.uid).onSnapshot(function(doc) {
                 if (doc.exists) { 
                     var data = doc.data();
                     document.getElementById('user-balance').innerText = data.balance + " NC"; 
-                    document.getElementById('user-score').innerText = "Skor: " + (data.score || 0); 
+                    document.getElementById('user-task-count').innerText = "Görev: " + (data.taskCount || 0); 
                     
                     if(document.getElementById('profile-balance')) {
                         document.getElementById('profile-balance').innerText = data.balance + " NC";
-                        document.getElementById('profile-score').innerText = (data.score || 0);
+                        document.getElementById('profile-task-count').innerText = (data.taskCount || 0);
                     }
                 }
                 else { 
-                    db.collection("users").doc(user.uid).set({ email: user.email, balance: 0, score: 0 }); 
+                    db.collection("users").doc(user.uid).set({ email: user.email, balance: 0, taskCount: 0 }); 
                     document.getElementById('user-balance').innerText = "0 NC"; 
                 }
             });
@@ -276,10 +298,12 @@
             magazayiYukleUser();
             sonSatinAlimlariYukle();
             liderlikTablosunuYukleUser();
+            geriSayimiBaslat(); // Geri sayımı başlat
         } else {
             document.getElementById('login-area').style.display = 'flex';
             document.getElementById('app-area').style.display = 'none';
             detayKapat();
+            if(countdownInterval) clearInterval(countdownInterval);
         }
     });
 
@@ -297,12 +321,35 @@
         else if(targetId === 'store-tab') sonSatinAlimlariYukle();
     }
 
-    // --- LİDERLİK TABLOSU (KULLANICI TARAFI) ---
+    // --- 30 GÜNLÜK GERİ SAYIM SAYACI ---
+    function geriSayimiBaslat() {
+        if(countdownInterval) clearInterval(countdownInterval);
+        
+        countdownInterval = setInterval(function() {
+            var now = new Date();
+            // Bir sonraki ayın ilk gününü hedefle
+            var nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+            var diff = nextMonth - now;
+            
+            var days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            var hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            var minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            var timerEl = document.getElementById('countdown-timer');
+            if(timerEl) {
+                timerEl.innerText = "⏳ Yeni Aya Kalan: " + days + " gün " + hours + " saat " + minutes + " dk " + seconds + " sn";
+            }
+        }, 1000);
+    }
+
+    // --- LİDERLİK TABLOSU (Görev Sayısına Göre) ---
     function liderlikTablosunuYukleUser() {
         var list = document.getElementById('user-leaderboard-list');
         list.innerHTML = 'Yükleniyor...';
         
-        db.collection("users").orderBy("score", "desc").limit(100).get().then(function(querySnapshot) {
+        // Sıralamayı 'taskCount' (görev sayısı) değerine göre yapıyoruz
+        db.collection("users").orderBy("taskCount", "desc").limit(100).get().then(function(querySnapshot) {
             list.innerHTML = '';
             if (querySnapshot.empty) {
                 list.innerHTML = '<p style="color:#666; text-align:center;">Henüz sıralama oluşmadı.</p>';
@@ -326,7 +373,7 @@
                 <div class="lb-item ${rankClass}">
                     <div class="lb-info">
                         <span class="lb-email">${medal} ${maskedEmail}</span>
-                        <span class="lb-score">${user.score || 0} Puan</span>
+                        <span class="lb-score">${user.taskCount || 0} Görev</span>
                     </div>
                     <div class="lb-rank">#${sira}</div>
                 </div>`;
@@ -414,7 +461,7 @@ function magazayiYukleUser() {
     });
 }
 
-// --- ENVANTERİ LİSTELE ---
+// --- ENVANTERİ LİSTELE (KOPYALAMA ÖZELLİKLİ) ---
 function envanteriYukle() {
     var list = document.getElementById('user-inventory-list');
     list.innerHTML = 'Yükleniyor...';
@@ -422,12 +469,37 @@ function envanteriYukle() {
         list.innerHTML = querySnapshot.empty ? '<p style="color: #666; text-align: center;">Henüz bir kodun yok.</p>' : '';
         querySnapshot.forEach(function(doc) {
             var order = doc.data();
-            list.innerHTML += `<div class="card"><div class="task-title">${order.productName}</div><div style="background: #eee; padding: 10px; border-radius: 5px; font-family: monospace; text-align: center; margin-top: 10px;">${order.deliveredCode}</div></div>`;
+            // Kopyalama div'i eklendi
+            list.innerHTML += `
+            <div class="card">
+                <div class="task-title">${order.productName}</div>
+                <div class="inventory-code-box" onclick="koduKopyala('${order.deliveredCode}', this)">
+                    <span class="code-text">${order.deliveredCode}</span>
+                    <span class="copy-icon">📋</span>
+                </div>
+                <p style="font-size:11px; color:#888; margin-top:5px; text-align:center;">Kodu kopyalamak için üzerine tıklayın.</p>
+            </div>`;
         });
     });
 }
 
-// --- SON SATIN ALIMLARI LİSTELE (İndeks Hatasız) ---
+// --- KOD KOPYALAMA FONKSİYONU ---
+function koduKopyala(text, element) {
+    // Geçici bir input oluşturup kopyalama yapıyoruz
+    var tempInput = document.createElement("input");
+    tempInput.value = text;
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    document.execCommand("copy");
+    document.body.removeChild(tempInput);
+    
+    // Görsel geri bildirim
+    var originalHTML = element.innerHTML;
+    element.innerHTML = '<span class="code-text" style="color:#00b359;">Kopyalandı! ✅</span>';
+    setTimeout(function() { element.innerHTML = originalHTML; }, 1500);
+}
+
+// --- SON SATIN ALIMLARI LİSTELE ---
 function sonSatinAlimlariYukle() {
     var list = document.getElementById('recent-purchases-list');
     list.innerHTML = 'Yükleniyor...';
@@ -441,7 +513,7 @@ function sonSatinAlimlariYukle() {
         var siparisler = [];
         querySnapshot.forEach(function(doc) { siparisler.push(doc.data()); });
 
-        // JavaScript ile yeniden eskiye sırala
+        // JavaScript ile en son tarihe göre sırala
         siparisler.sort(function(a, b) {
             var timeA = a.createdAt ? a.createdAt.toDate().getTime() : 0;
             var timeB = b.createdAt ? b.createdAt.toDate().getTime() : 0;
@@ -465,6 +537,7 @@ function sonSatinAlimlariYukle() {
     });
 }
 
+// Zaman Farkı
 function zamanFarkiHesapla(timestamp) {
     if (!timestamp) return "Bilinmiyor";
     var now = new Date();
@@ -519,20 +592,23 @@ function zamanFarkiHesapla(timestamp) {
         function destekTalebiAc() {
             var mesaj = prompt("Lütfen sorununuzu yazın:");
             if (mesaj && mesaj.trim() !== "") {
-                db.collection("tickets").add({ userEmail: currentUser.email, message: mesaj, status: "open", createdAt: new Date() })
-                .then(function() { alert("Talebiniz iletildi."); });
+                db.collection("tickets").add({ userEmail: currentUser.email, message: "DESTEK: " + mesaj, status: "open", createdAt: new Date() })
+                .then(function() { alert("Talebiniz iletildi. En kısa sürede dönüş yapılacaktır."); });
             }
         }
 
         function hesabiSil() {
-            if (confirm("Hesabınızı silmek istediğinize emin misiniz?")) {
+            if (confirm("Hesabınızı silmek istediğinize emin misiniz? Tüm verileriniz silinecektir.")) {
                 db.collection("users").doc(currentUser.uid).delete().then(function() {
-                    currentUser.delete().then(function() { window.location.reload(); });
-                });
+                    currentUser.delete().then(function() { 
+                        alert("Hesabınız silindi. Görüşmek üzere!");
+                        window.location.reload(); 
+                    });
+                }).catch(function(error){ alert("Hata: Lütfen tekrar giriş yapıp deneyin. " + error.message); });
             }
         }
 
-        // --- DETAY SAYFASI VE KANIT İŞLEMLERİ ---
+        // --- DETAY SAYFASI VE SORUN BİLDİRME ---
         function detayAc(taskTitle, amount, giveawayId, url, instruction) {
             seciliGorev = taskTitle; seciliOdul = amount; seciliCekilisId = giveawayId; seciliResimBase64 = "";
             document.getElementById('detail-task-title').innerText = taskTitle;
@@ -550,6 +626,21 @@ function zamanFarkiHesapla(timestamp) {
         }
 
         function detayKapat() { document.getElementById('task-detail-page').style.display = 'none'; }
+
+        // YENİ: Sorun Bildir Fonksiyonu
+        function sorunBildir() {
+            var mesaj = prompt("Lütfen yaşadığınız sorunu kısaca yazın (Örn: Link çalışmıyor):");
+            if (mesaj && mesaj.trim() !== "") {
+                db.collection("tickets").add({ 
+                    userEmail: currentUser.email, 
+                    message: "GÖREV SORUNU (" + seciliGorev + "): " + mesaj, 
+                    status: "open", 
+                    createdAt: new Date() 
+                }).then(function() { 
+                    alert("Sorununuz yöneticiye iletildi. Teşekkür ederiz."); 
+                });
+            }
+        }
 
         function resimOnizle(input) {
             if (input.files && input.files[0]) {
