@@ -49,6 +49,7 @@
         .form-group input, .form-group textarea { width: 100%; padding: 12px; background-color: #2a2a2a; border: 1px solid #444; border-radius: 5px; color: white; font-size: 15px; font-family: inherit; }
         .btn-primary { background-color: #ffcc00; color: #121212; border: none; padding: 12px 20px; font-size: 16px; font-weight: bold; border-radius: 5px; cursor: pointer; transition: 0.3s; width: 100%; }
         .btn-primary:hover { background-color: #e6b800; }
+        .btn-danger { background-color: #ff4444; color: white; border: none; padding: 12px 20px; font-size: 16px; font-weight: bold; border-radius: 5px; cursor: pointer; transition: 0.3s; width: 100%; margin-top: 10px;}
         .content-box { background-color: #1e1e1e; padding: 25px; border-radius: 10px; border: 1px solid #333; margin-bottom: 20px; }
         .content-box h2 { margin-bottom: 20px; color: #eee; font-size: 18px; border-bottom: 1px solid #333; padding-bottom: 10px; }
         
@@ -68,10 +69,14 @@
         .giveaway-item { border-left: 4px solid #ff00ff; }
         .btn-winner { background-color: #ff00ff; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
 
-        /* YENİ: Kullanıcı Yönetimi Butonları */
         .btn-ban { background-color: #ff0000; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold; }
         .btn-add-nc { background-color: #4da6ff; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold; }
         .ticket-item { border-left: 4px solid #4da6ff; }
+        
+        .leaderboard-item { border-left: 4px solid #ffcc00; background: #1a1a1a; }
+        .rank-1 { border-left: 4px solid #ffd700; background: #2a2510; } /* Altın */
+        .rank-2 { border-left: 4px solid #c0c0c0; background: #222222; } /* Gümüş */
+        .rank-3 { border-left: 4px solid #cd7f32; background: #251810; } /* Bronz */
     </style>
 </head>
 <body>
@@ -100,8 +105,9 @@
                 <button class="menu-item" onclick="sekmeDegistir('store', this)">🛒 Mağaza & Kodlar</button>
                 <button class="menu-item" onclick="sekmeDegistir('orders', this)">📦 Siparişler</button>
                 <button class="menu-item" onclick="sekmeDegistir('giveaways', this)">🎁 Çekilişler</button>
-                <!-- YENİ SEKMELER -->
                 <button class="menu-item" onclick="sekmeDegistir('tickets', this)">🎫 Destek Talepleri</button>
+                <!-- YENİ: Liderlik Tablosu -->
+                <button class="menu-item" onclick="sekmeDegistir('leaderboard', this)">🏆 Liderlik Tablosu</button>
             </nav>
             <button class="logout-btn-sidebar" onclick="cikisFonksiyonu()">🚪 Çıkış Yap</button>
         </aside>
@@ -137,7 +143,7 @@
                     </div>
                 </div>
 
-                <!-- KULLANICILAR (Güncellendi) -->
+                <!-- KULLANICILAR -->
                 <div id="users" class="page-section">
                     <div class="content-box">
                         <h2>Kayıtlı Kullanıcılar (Banlama ve Puanlama)</h2>
@@ -192,11 +198,24 @@
                     </div>
                 </div>
 
-                <!-- DESTEK TALEPLERİ (YENİ) -->
+                <!-- DESTEK TALEPLERİ -->
                 <div id="tickets" class="page-section">
                     <div class="content-box">
                         <h2>Kullanıcı Destek Talepleri</h2>
                         <div id="ticket-list"></div>
+                    </div>
+                </div>
+
+                <!-- LİDERLİK TABLOSU (YENİ) -->
+                <div id="leaderboard" class="page-section">
+                    <div class="content-box">
+                        <h2>Sıralama Yönetimi</h2>
+                        <p style="color:#aaa; margin-bottom:15px; font-size:14px;">Buradan ilk 100'ü görebilir ve ödül verebilirsiniz. "Yeni Ay" butonu tüm skorları sıfırlar (Bakiyeler silinmez).</p>
+                        <button class="btn-danger" onclick="skorlariSifirla()">🔄 Yeni Ay Başlat (Skorları Sıfırla)</button>
+                    </div>
+                    <div class="content-box">
+                        <h2>Top 100 Listesi (Aylık)</h2>
+                        <div id="leaderboard-list"></div>
                     </div>
                 </div>
 
@@ -243,7 +262,7 @@
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('admin-panel').style.display = 'flex';
             document.getElementById('user-email').innerText = user.email;
-            istatistikleriYukle(); gorevleriYukle(); kullanicilariYukle(); magazayiYukle(); siparisleriYukle(); cekilisleriYukle(); destekTalepleriniYukle();
+            istatistikleriYukle(); gorevleriYukle(); kullanicilariYukle(); magazayiYukle(); siparisleriYukle(); cekilisleriYukle(); destekTalepleriniYukle(); liderlikTablosunuYukle();
         } else {
             document.getElementById('login-screen').style.display = 'flex';
             document.getElementById('admin-panel').style.display = 'none';
@@ -267,6 +286,7 @@
         else if (targetId === 'proofs') kanitlariYukle();
         else if (targetId === 'giveaways') cekilisleriYukle();
         else if (targetId === 'tickets') destekTalepleriniYukle();
+        else if (targetId === 'leaderboard') liderlikTablosunuYukle();
     }
 
     function istatistikleriYukle() {
@@ -291,7 +311,10 @@
                 var banText = user.isBanned ? '<span style="color:red; font-size:12px;">(BANLI)</span>' : '';
                 list.innerHTML += `
                 <div class="list-item">
-                    <div class="item-info"><h4>${user.email} ${banText}</h4><span>Bakiye: ${user.balance} NC</span></div>
+                    <div class="item-info">
+                        <h4>${user.email} ${banText}</h4>
+                        <span>Bakiye: ${user.balance} NC</span> | <span style="color:#4da6ff;">Skor: ${user.score || 0}</span>
+                    </div>
                     <div style="display:flex; gap:5px; flex-wrap:wrap;">
                         <button class="btn-add-nc" onclick="puanEkle('${doc.id}', '${user.email}')">💰 Puan Ekle/Çıkar</button>
                         <button class="btn-ban" onclick="kullaniciBanla('${doc.id}', ${user.isBanned || false})">${user.isBanned ? 'Ban Kaldır' : '🚫 Banla'}</button>
@@ -320,178 +343,223 @@
         }
     }
 
-    function destekTalepleriniYukle() {
-        var list = document.getElementById('ticket-list');
-        list.innerHTML = 'Yükleniyor...';
-        db.collection("tickets").where("status", "==", "open").get().then(function(querySnapshot) {
-            list.innerHTML = querySnapshot.empty ? 'Bekleyen talep yok.' : '';
+    // --- LİDERLİK TABLOSU İŞLEMLERİ ---
+    function liderlikTablosunuYukle() {
+        var list = document.getElementById('leaderboard-list');
+        list.innerHTML = 'Sıralama yükleniyor...';
+        
+        // Skora göre büyükten küçüğe sırala ve ilk 100'ü al
+        db.collection("users").orderBy("score", "desc").limit(100).get().then(function(querySnapshot) {
+            list.innerHTML = '';
+            if (querySnapshot.empty) {
+                list.innerHTML = '<p style="color:#aaa;">Henüz sıralama oluşmadı.</p>';
+                return;
+            }
+
+            var sira = 1;
             querySnapshot.forEach(function(doc) {
-                var ticket = doc.data();
+                var user = doc.data();
+                var rankClass = "";
+                var medal = "";
+                
+                if (sira === 1) { rankClass = "rank-1"; medal = "🥇"; }
+                else if (sira === 2) { rankClass = "rank-2"; medal = "🥈"; }
+                else if (sira === 3) { rankClass = "rank-3"; medal = "🥉"; }
+                
+                var rewardBtn = "";
+                if (sira <= 3) {
+                    rewardBtn = `<button class="btn-add-nc" onclick="odulVer('${user.email}')">🎁 Ödül Ver</button>`;
+                }
+
                 list.innerHTML += `
-                <div class="list-item ticket-item" style="flex-direction: column; align-items: flex-start;">
-                    <div class="item-info" style="width:100%; margin-bottom: 10px;"><h4 style="color:#4da6ff;">${ticket.userEmail}</h4><p style="margin-top:5px; color:white;">"${ticket.message}"</p></div>
-                    <button class="btn-approve" style="flex:none; width:auto; padding:8px 15px;" onclick="talebiKapat('${doc.id}')">✅ Kapat</button>
+                <div class="list-item leaderboard-item ${rankClass}">
+                    <div class="item-info">
+                        <h4>${medal} ${sira}. ${user.email}</h4>
+                        <span style="color:#ffcc00;">Skor: ${user.score || 0}</span>
+                    </div>
+                    ${rewardBtn}
                 </div>`;
+                sira++;
             });
         });
     }
 
-    window.talebiKapat = function(ticketId) {
-        if (confirm("Talebi kapatmak istiyor musunuz?")) {
-            db.collection("tickets").doc(ticketId).update({ status: "closed" }).then(function() { destekTalepleriniYukle(); });
+    window.odulVer = function(email) {
+        alert(email + " kullanıcısına ödül vermek için mağaza veya manuel puan ekleme sistemini kullanabilirsiniz.\n\nİleride buraya 'Play Store Kodu Gönder' butonu ekleyeceğiz.");
+    }
+
+    window.skorlariSifirla = function() {
+        if (confirm("DİKKAT! Tüm kullanıcıların skorları SIFIRLANACAK. Bakiyeleri (NC) silinmeyecek. Emin misiniz?")) {
+            db.collection("users").get().then(function(querySnapshot) {
+                var batch = db.batch();
+                querySnapshot.forEach(function(doc) {
+                    batch.update(doc.ref, { score: 0 });
+                });
+                return batch.commit();
+            }).then(function() {
+                alert("Yeni ay başlatıldı, tüm skorlar sıfırlandı!");
+                liderlikTablosunuYukle();
+            }).catch(function(error) {
+                alert("Hata: " + error.message);
+            });
         }
     }
-    // --- GÖREV İŞLEMLERİ ---
-function gorevEkle() {
-    var title = document.getElementById('task-title').value;
-    var url = document.getElementById('task-url').value;
-    var reward = parseInt(document.getElementById('task-reward').value);
-    var instruction = document.getElementById('task-instruction').value;
-    if(!title || !url || !reward) { alert("Lütfen zorunlu alanları doldurun."); return; }
-    db.collection("tasks").add({ title: title, url: url, reward: reward, instruction: instruction })
-    .then(function() {
-        alert("Görev Eklendi");
-        document.getElementById('task-title').value = ''; document.getElementById('task-url').value = ''; document.getElementById('task-reward').value = ''; document.getElementById('task-instruction').value = '';
-        gorevleriYukle();
-    }).catch(function(error) { alert("Hata: " + error.message); });
-}
+           // --- GÖREV İŞLEMLERİ ---
+        function gorevEkle() {
+            var title = document.getElementById('task-title').value;
+            var url = document.getElementById('task-url').value;
+            var reward = parseInt(document.getElementById('task-reward').value);
+            var instruction = document.getElementById('task-instruction').value;
+            if(!title || !url || !reward) { alert("Lütfen zorunlu alanları doldurun."); return; }
+            db.collection("tasks").add({ title: title, url: url, reward: reward, instruction: instruction })
+            .then(function() {
+                alert("Görev Eklendi");
+                document.getElementById('task-title').value = ''; document.getElementById('task-url').value = ''; document.getElementById('task-reward').value = ''; document.getElementById('task-instruction').value = '';
+                gorevleriYukle();
+            }).catch(function(error) { alert("Hata: " + error.message); });
+        }
 
-function gorevleriYukle() {
-    var list = document.getElementById('task-list');
-    list.innerHTML = 'Yükleniyor...';
-    db.collection("tasks").get().then(function(querySnapshot) {
-        list.innerHTML = querySnapshot.empty ? 'Görev yok.' : '';
-        querySnapshot.forEach(function(doc) {
-            var data = doc.data();
-            list.innerHTML += `<div class="list-item"><div class="item-info"><h4>${data.title}</h4><span>${data.reward} NC</span></div><button class="btn-delete" onclick="sil('tasks', '${doc.id}')">Sil</button></div>`;
-        });
-    });
-}
+        function gorevleriYukle() {
+            var list = document.getElementById('task-list');
+            list.innerHTML = 'Yükleniyor...';
+            db.collection("tasks").get().then(function(querySnapshot) {
+                list.innerHTML = querySnapshot.empty ? 'Görev yok.' : '';
+                querySnapshot.forEach(function(doc) {
+                    var data = doc.data();
+                    list.innerHTML += `<div class="list-item"><div class="item-info"><h4>${data.title}</h4><span>${data.reward} NC</span></div><button class="btn-delete" onclick="sil('tasks', '${doc.id}')">Sil</button></div>`;
+                });
+            });
+        }
 
-// --- MAĞAZA İŞLEMLERİ ---
-function urunEkle() {
-    var title = document.getElementById('store-title').value;
-    var price = parseInt(document.getElementById('store-price').value);
-    var stock = parseInt(document.getElementById('store-stock').value);
-    if(!title || !price || !stock) { alert("Lütfen tüm alanları doldurun."); return; }
-    db.collection("store").add({ title: title, price: price, stock: stock })
-    .then(function() {
-        alert("Ürün Eklendi");
-        document.getElementById('store-title').value = ''; document.getElementById('store-price').value = ''; document.getElementById('store-stock').value = '';
-        magazayiYukle();
-    }).catch(function(error) { alert("Hata: " + error.message); });
-}
+        // --- MAĞAZA İŞLEMLERİ ---
+        function urunEkle() {
+            var title = document.getElementById('store-title').value;
+            var price = parseInt(document.getElementById('store-price').value);
+            var stock = parseInt(document.getElementById('store-stock').value);
+            if(!title || !price || !stock) { alert("Lütfen tüm alanları doldurun."); return; }
+            db.collection("store").add({ title: title, price: price, stock: stock })
+            .then(function() {
+                alert("Ürün Eklendi");
+                document.getElementById('store-title').value = ''; document.getElementById('store-price').value = ''; document.getElementById('store-stock').value = '';
+                magazayiYukle();
+            }).catch(function(error) { alert("Hata: " + error.message); });
+        }
 
-function magazayiYukle() {
-    var list = document.getElementById('store-list');
-    list.innerHTML = 'Yükleniyor...';
-    db.collection("store").get().then(function(querySnapshot) {
-        list.innerHTML = querySnapshot.empty ? 'Ürün yok.' : '';
-        querySnapshot.forEach(function(doc) {
-            var data = doc.data();
-            list.innerHTML += `<div class="list-item"><div class="item-info"><h4>${data.title}</h4><p>${data.price} NC - Stok: ${data.stock}</p></div><button class="btn-delete" onclick="sil('store', '${doc.id}')">Sil</button></div>`;
-        });
-    });
-}
+        function magazayiYukle() {
+            var list = document.getElementById('store-list');
+            list.innerHTML = 'Yükleniyor...';
+            db.collection("store").get().then(function(querySnapshot) {
+                list.innerHTML = querySnapshot.empty ? 'Ürün yok.' : '';
+                querySnapshot.forEach(function(doc) {
+                    var data = doc.data();
+                    list.innerHTML += `<div class="list-item"><div class="item-info"><h4>${data.title}</h4><p>${data.price} NC - Stok: ${data.stock}</p></div><button class="btn-delete" onclick="sil('store', '${doc.id}')">Sil</button></div>`;
+                });
+            });
+        }
 
-// --- SİPARİŞ İŞLEMLERİ ---
-function siparisleriYukle() {
-    var list = document.getElementById('order-list');
-    list.innerHTML = 'Yükleniyor...';
-    db.collection("orders").where("status", "==", "pending").get().then(function(querySnapshot) {
-        list.innerHTML = querySnapshot.empty ? 'Bekleyen sipariş yok.' : '';
-        querySnapshot.forEach(function(doc) {
-            var order = doc.data();
-            list.innerHTML += `
-            <div class="list-item" style="flex-direction: column; align-items: flex-start;">
-                <div class="item-info" style="width:100%; margin-bottom: 10px;"><h4>${order.productName}</h4><p>Müşteri: ${order.userEmail} | Ödenen: ${order.price} NC</p></div>
-                <div class="action-area"><input type="text" class="action-input" id="code-input-${doc.id}" placeholder="Play Store Kodu..."><button class="btn-send" onclick="kodGonder('${doc.id}')">Gönder</button></div>
-            </div>`;
-        });
-    });
-}
+        // --- SİPARİŞ İŞLEMLERİ ---
+        function siparisleriYukle() {
+            var list = document.getElementById('order-list');
+            list.innerHTML = 'Yükleniyor...';
+            db.collection("orders").where("status", "==", "pending").get().then(function(querySnapshot) {
+                list.innerHTML = querySnapshot.empty ? 'Bekleyen sipariş yok.' : '';
+                querySnapshot.forEach(function(doc) {
+                    var order = doc.data();
+                    list.innerHTML += `
+                    <div class="list-item" style="flex-direction: column; align-items: flex-start;">
+                        <div class="item-info" style="width:100%; margin-bottom: 10px;"><h4>${order.productName}</h4><p>Müşteri: ${order.userEmail} | Ödenen: ${order.price} NC</p></div>
+                        <div class="action-area"><input type="text" class="action-input" id="code-input-${doc.id}" placeholder="Play Store Kodu..."><button class="btn-send" onclick="kodGonder('${doc.id}')">Gönder</button></div>
+                    </div>`;
+                });
+            });
+        }
 
-function kodGonder(orderId) {
-    var code = document.getElementById('code-input-' + orderId).value.trim();
-    if (!code) { alert("Lütfen bir kod girin!"); return; }
-    db.collection("orders").doc(orderId).update({ status: "completed", deliveredCode: code })
-    .then(function() { alert("Kod Gönderildi!"); siparisleriYukle(); })
-    .catch(function(error) { alert("Hata: " + error.message); });
-}
+        function kodGonder(orderId) {
+            var code = document.getElementById('code-input-' + orderId).value.trim();
+            if (!code) { alert("Lütfen bir kod girin!"); return; }
+            db.collection("orders").doc(orderId).update({ status: "completed", deliveredCode: code })
+            .then(function() { alert("Kod Gönderildi!"); siparisleriYukle(); })
+            .catch(function(error) { alert("Hata: " + error.message); });
+        }
 
-// --- KANIT ONAY İŞLEMLERİ ---
-function kanitlariYukle() {
-    var list = document.getElementById('proof-list');
-    list.innerHTML = 'Yükleniyor...';
-    db.collection("proofs").where("status", "==", "pending").get().then(function(querySnapshot) {
-        list.innerHTML = querySnapshot.empty ? 'Bekleyen kanıt yok.' : '';
-        querySnapshot.forEach(function(doc) {
-            var proof = doc.data();
-            var isCekilis = proof.giveawayId ? "🎁 ÇEKİLİŞ KATILIMI" : "📝 NORMAL GÖREV";
-            var odulText = proof.giveawayId ? "Katılım Bedeli: " + proof.cost + " NC" : "Kazanç: " + proof.reward + " NC";
-            
-            list.innerHTML += `
-            <div class="list-item" style="flex-direction: column; align-items: flex-start;">
-                <div class="item-info" style="width:100%;">
-                    <h4 style="color:${proof.giveawayId ? '#ff00ff' : '#ffcc00'}">${isCekilis} - Görev: ${proof.taskTitle}</h4>
-                    <p>Kullanıcı: ${proof.userEmail} | ${odulText}</p>
-                </div>
-                <img src="${proof.imageUrl}" class="proof-img" onclick="window.open('${proof.imageUrl}', '_blank')">
-                <div class="action-area" style="margin-top: 15px;"><button class="btn-approve" onclick="kanitOnayla('${doc.id}')">✅ Onayla</button><button class="btn-reject" onclick="kanitReddet('${doc.id}')">❌ Reddet</button></div>
-            </div>`;
-        });
-    });
-}
+        // --- KANIT ONAY İŞLEMLERİ (Hem Bakiye Hem Skor Artırır) ---
+        function kanitlariYukle() {
+            var list = document.getElementById('proof-list');
+            list.innerHTML = 'Yükleniyor...';
+            db.collection("proofs").where("status", "==", "pending").get().then(function(querySnapshot) {
+                list.innerHTML = querySnapshot.empty ? 'Bekleyen kanıt yok.' : '';
+                querySnapshot.forEach(function(doc) {
+                    var proof = doc.data();
+                    var isCekilis = proof.giveawayId ? "🎁 ÇEKİLİŞ KATILIMI" : "📝 NORMAL GÖREV";
+                    var odulText = proof.giveawayId ? "Katılım Bedeli: " + proof.cost + " NC" : "Kazanç: " + proof.reward + " NC";
+                    
+                    list.innerHTML += `
+                    <div class="list-item" style="flex-direction: column; align-items: flex-start;">
+                        <div class="item-info" style="width:100%;">
+                            <h4 style="color:${proof.giveawayId ? '#ff00ff' : '#ffcc00'}">${isCekilis} - Görev: ${proof.taskTitle}</h4>
+                            <p>Kullanıcı: ${proof.userEmail} | ${odulText}</p>
+                        </div>
+                        <img src="${proof.imageUrl}" class="proof-img" onclick="window.open('${proof.imageUrl}', '_blank')">
+                        <div class="action-area" style="margin-top: 15px;"><button class="btn-approve" onclick="kanitOnayla('${doc.id}')">✅ Onayla</button><button class="btn-reject" onclick="kanitReddet('${doc.id}')">❌ Reddet</button></div>
+                    </div>`;
+                });
+            });
+        }
 
-function kanitOnayla(proofId) {
-    if (confirm("Onaylıyor musunuz?")) {
-        db.collection("proofs").doc(proofId).get().then(function(doc) {
-            if (doc.exists) {
-                var proofData = doc.data();
-                var userEmail = proofData.userEmail;
-                
-                if (proofData.giveawayId) {
-                    var cost = proofData.cost;
-                    var gId = proofData.giveawayId;
-                    db.collection("users").where("email", "==", userEmail).get().then(function(querySnapshot) {
-                        if (!querySnapshot.empty) {
-                            var userDocId = querySnapshot.docs[0].id;
-                            db.collection("users").doc(userDocId).update({ balance: firebase.firestore.FieldValue.increment(-cost) }).then(function() {
-                                db.collection("giveaways").doc(gId).update({ participants: firebase.firestore.FieldValue.arrayUnion(userEmail) }).then(function() {
-                                    db.collection("proofs").doc(proofId).update({ status: "approved" }).then(function() {
-                                        alert("Çekiliş katılımı onaylandı! " + cost + " NC düşüldü.");
-                                        kanitlariYukle();
+        function kanitOnayla(proofId) {
+            if (confirm("Onaylıyor musunuz?")) {
+                db.collection("proofs").doc(proofId).get().then(function(doc) {
+                    if (doc.exists) {
+                        var proofData = doc.data();
+                        var userEmail = proofData.userEmail;
+                        
+                        if (proofData.giveawayId) {
+                            var cost = proofData.cost;
+                            var gId = proofData.giveawayId;
+                            db.collection("users").where("email", "==", userEmail).get().then(function(querySnapshot) {
+                                if (!querySnapshot.empty) {
+                                    var userDocId = querySnapshot.docs[0].id;
+                                    db.collection("users").doc(userDocId).update({ balance: firebase.firestore.FieldValue.increment(-cost) }).then(function() {
+                                        db.collection("giveaways").doc(gId).update({ participants: firebase.firestore.FieldValue.arrayUnion(userEmail) }).then(function() {
+                                            db.collection("proofs").doc(proofId).update({ status: "approved" }).then(function() {
+                                                alert("Çekiliş katılımı onaylandı! " + cost + " NC düşüldü.");
+                                                kanitlariYukle();
+                                            });
+                                        });
                                     });
+                                } else { alert("Hata: Kullanıcı bulunamadı!"); }
+                            });
+                        } else {
+                            var rewardAmount = proofData.reward;
+                            db.collection("proofs").doc(proofId).update({ status: "approved" }).then(function() {
+                                db.collection("users").where("email", "==", userEmail).get().then(function(querySnapshot) {
+                                    if (!querySnapshot.empty) {
+                                        var userDocId = querySnapshot.docs[0].id;
+                                        // Hem bakiyeye (balance) hem skora (score) ekle
+                                        db.collection("users").doc(userDocId).update({ 
+                                            balance: firebase.firestore.FieldValue.increment(rewardAmount),
+                                            score: firebase.firestore.FieldValue.increment(rewardAmount)
+                                        }).then(function() {
+                                            alert("Onaylandı! " + rewardAmount + " NC yatırıldı ve skora eklendi.");
+                                            kanitlariYukle();
+                                            istatistikleriYukle();
+                                        });
+                                    } else { alert("Hata: Kullanıcı bulunamadı!"); }
                                 });
                             });
-                        } else { alert("Hata: Kullanıcı bulunamadı!"); }
-                    });
-                } else {
-                    var rewardAmount = proofData.reward;
-                    db.collection("proofs").doc(proofId).update({ status: "approved" }).then(function() {
-                        db.collection("users").where("email", "==", userEmail).get().then(function(querySnapshot) {
-                            if (!querySnapshot.empty) {
-                                var userDocId = querySnapshot.docs[0].id;
-                                db.collection("users").doc(userDocId).update({ balance: firebase.firestore.FieldValue.increment(rewardAmount) }).then(function() {
-                                    alert("Onaylandı! " + rewardAmount + " NC yatırıldı.");
-                                    kanitlariYukle();
-                                    istatistikleriYukle();
-                                });
-                            } else { alert("Hata: Kullanıcı bulunamadı!"); }
-                        });
-                    });
-                }
+                        }
+                    }
+                }).catch(function(error) { alert("Hata: " + error.message); });
             }
-        }).catch(function(error) { alert("Hata: " + error.message); });
-    }
-}
+        }
 
-function kanitReddet(proofId) {
-    if (confirm("Reddediyor musunuz?")) {
-        db.collection("proofs").doc(proofId).update({ status: "rejected" }).then(function() { alert("Reddedildi!"); kanitlariYukle(); });
-    }
-          }
-            // --- ÇEKİLİŞ İŞLEMLERİ ---
+        function kanitReddet(proofId) {
+            if (confirm("Reddediyor musunuz?")) {
+                db.collection("proofs").doc(proofId).update({ status: "rejected" }).then(function() { alert("Reddedildi!"); kanitlariYukle(); });
+            }
+        }
+
+        // --- ÇEKİLİŞ İŞLEMLERİ ---
         function cekilisBaslat() {
             var prize = document.getElementById('giveaway-prize').value;
             var cost = parseInt(document.getElementById('giveaway-cost').value);
@@ -545,6 +613,29 @@ function kanitReddet(proofId) {
             }
         }
 
+        // --- DESTEK TALEPLERİ İŞLEMLERİ ---
+        function destekTalepleriniYukle() {
+            var list = document.getElementById('ticket-list');
+            list.innerHTML = 'Yükleniyor...';
+            db.collection("tickets").where("status", "==", "open").get().then(function(querySnapshot) {
+                list.innerHTML = querySnapshot.empty ? 'Bekleyen talep yok.' : '';
+                querySnapshot.forEach(function(doc) {
+                    var ticket = doc.data();
+                    list.innerHTML += `
+                    <div class="list-item ticket-item" style="flex-direction: column; align-items: flex-start;">
+                        <div class="item-info" style="width:100%; margin-bottom: 10px;"><h4 style="color:#4da6ff;">${ticket.userEmail}</h4><p style="margin-top:5px; color:white;">"${ticket.message}"</p></div>
+                        <button class="btn-approve" style="flex:none; width:auto; padding:8px 15px;" onclick="talebiKapat('${doc.id}')">✅ Kapat</button>
+                    </div>`;
+                });
+            });
+        }
+
+        window.talebiKapat = function(ticketId) {
+            if (confirm("Talebi kapatmak istiyor musunuz?")) {
+                db.collection("tickets").doc(ticketId).update({ status: "closed" }).then(function() { destekTalepleriniYukle(); });
+            }
+        }
+
         // --- ORTAK SİLME ---
         function sil(collectionName, id) {
             if(confirm("Silmek istediğinize emin misiniz?")) {
@@ -557,4 +648,4 @@ function kanitReddet(proofId) {
         }
     </script>
 </body>
-</html>
+</html> 
