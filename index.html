@@ -74,9 +74,9 @@
         .ticket-item { border-left: 4px solid #4da6ff; }
         
         .leaderboard-item { border-left: 4px solid #ffcc00; background: #1a1a1a; }
-        .rank-1 { border-left: 4px solid #ffd700; background: #2a2510; } /* Altın */
-        .rank-2 { border-left: 4px solid #c0c0c0; background: #222222; } /* Gümüş */
-        .rank-3 { border-left: 4px solid #cd7f32; background: #251810; } /* Bronz */
+        .rank-1 { border-left: 4px solid #ffd700; background: #2a2510; }
+        .rank-2 { border-left: 4px solid #c0c0c0; background: #222222; }
+        .rank-3 { border-left: 4px solid #cd7f32; background: #251810; }
     </style>
 </head>
 <body>
@@ -106,7 +106,6 @@
                 <button class="menu-item" onclick="sekmeDegistir('orders', this)">📦 Siparişler</button>
                 <button class="menu-item" onclick="sekmeDegistir('giveaways', this)">🎁 Çekilişler</button>
                 <button class="menu-item" onclick="sekmeDegistir('tickets', this)">🎫 Destek Talepleri</button>
-                <!-- YENİ: Liderlik Tablosu -->
                 <button class="menu-item" onclick="sekmeDegistir('leaderboard', this)">🏆 Liderlik Tablosu</button>
             </nav>
             <button class="logout-btn-sidebar" onclick="cikisFonksiyonu()">🚪 Çıkış Yap</button>
@@ -118,7 +117,6 @@
             </header>
             <div class="content-area">
                 
-                <!-- GENEL BAKIŞ -->
                 <div id="overview" class="page-section active">
                     <div class="stats-grid">
                         <div class="stat-card"><span class="stat-title">Toplam Kullanıcı</span><span class="stat-value" id="stat-total-users">0</span></div>
@@ -127,7 +125,6 @@
                     </div>
                 </div>
                 
-                <!-- GÖREVLER -->
                 <div id="tasks" class="page-section">
                     <div class="content-box">
                         <h2>Yeni Görev Ekle</h2>
@@ -143,15 +140,13 @@
                     </div>
                 </div>
 
-                <!-- KULLANICILAR -->
                 <div id="users" class="page-section">
                     <div class="content-box">
-                        <h2>Kayıtlı Kullanıcılar (Banlama ve Puanlama)</h2>
+                        <h2>Kayıtlı Kullanıcılar</h2>
                         <div id="user-list"></div>
                     </div>
                 </div>
 
-                <!-- MAĞAZA -->
                 <div id="store" class="page-section">
                     <div class="content-box">
                         <h2>Yeni Ürün Ekle</h2>
@@ -166,7 +161,6 @@
                     </div>
                 </div>
 
-                <!-- SİPARİŞLER -->
                 <div id="orders" class="page-section">
                     <div class="content-box">
                         <h2>Bekleyen Kod Talepleri</h2>
@@ -174,7 +168,6 @@
                     </div>
                 </div>
 
-                <!-- KANIT ONAYLARI -->
                 <div id="proofs" class="page-section">
                     <div class="content-box">
                         <h2>Bekleyen Görev ve Çekiliş Kanıtları</h2>
@@ -182,7 +175,6 @@
                     </div>
                 </div>
 
-                <!-- ÇEKİLİŞLER -->
                 <div id="giveaways" class="page-section">
                     <div class="content-box">
                         <h2>Yeni Çekiliş Başlat</h2>
@@ -198,7 +190,6 @@
                     </div>
                 </div>
 
-                <!-- DESTEK TALEPLERİ -->
                 <div id="tickets" class="page-section">
                     <div class="content-box">
                         <h2>Kullanıcı Destek Talepleri</h2>
@@ -206,12 +197,11 @@
                     </div>
                 </div>
 
-                <!-- LİDERLİK TABLOSU (YENİ) -->
                 <div id="leaderboard" class="page-section">
                     <div class="content-box">
                         <h2>Sıralama Yönetimi</h2>
-                        <p style="color:#aaa; margin-bottom:15px; font-size:14px;">Buradan ilk 100'ü görebilir ve ödül verebilirsiniz. "Yeni Ay" butonu tüm skorları sıfırlar (Bakiyeler silinmez).</p>
-                        <button class="btn-danger" onclick="skorlariSifirla()">🔄 Yeni Ay Başlat (Skorları Sıfırla)</button>
+                        <p style="color:#aaa; margin-bottom:15px; font-size:14px;">Buradan ilk 100'ü görebilir ve ödül verebilirsiniz. "Yeni Ay" butonu tüm görev sayılarını sıfırlar (Bakiyeler silinmez).</p>
+                        <button class="btn-danger" onclick="skorlariSifirla()">🔄 Yeni Ay Başlat (Görev Sayılarını Sıfırla)</button>
                     </div>
                     <div class="content-box">
                         <h2>Top 100 Listesi (Aylık)</h2>
@@ -242,6 +232,9 @@
     var auth = firebase.auth();
     var db = firebase.firestore();
 
+    // --- GÜVENLİK: SADECE BU MAİL ADMİN OLABİLİR ---
+    var ADMIN_EMAIL = "ahmetcelil50@gmail.com"; // BURAYA KENDİ MAİLİNİ YAZ
+
     function loginFonksiyonu() {
         var email = document.getElementById('admin-email').value;
         var password = document.getElementById('admin-password').value;
@@ -258,11 +251,22 @@
     function cikisFonksiyonu() { auth.signOut(); }
 
     auth.onAuthStateChanged(function(user) {
-        if (user) {
+        if (user && user.email === ADMIN_EMAIL) {
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('admin-panel').style.display = 'flex';
             document.getElementById('user-email').innerText = user.email;
-            istatistikleriYukle(); gorevleriYukle(); kullanicilariYukle(); magazayiYukle(); siparisleriYukle(); cekilisleriYukle(); destekTalepleriniYukle(); liderlikTablosunuYukle();
+            
+            // Yüklemeleri başlat
+            istatistikleriYukle(); gorevleriYukle(); kullanicilariYukle(); 
+            magazayiYukle(); siparisleriYukle(); cekilisleriYukle(); 
+            destekTalepleriniYukle(); liderlikTablosunuYukle();
+            otomatikAyKontrolu(); // Ay sıfırlama kontrolü
+        } else if (user) {
+            // Başkası giriş yaparsa anında çıkış yaptır
+            alert("GÜVENLİK İHLALİ! Bu panele sadece yetkili kişi giriş yapabilir.");
+            auth.signOut();
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('admin-panel').style.display = 'none';
         } else {
             document.getElementById('login-screen').style.display = 'flex';
             document.getElementById('admin-panel').style.display = 'none';
@@ -289,6 +293,36 @@
         else if (targetId === 'leaderboard') liderlikTablosunuYukle();
     }
 
+    // --- OTOMATİK AY SIFIRLAMA KONTROLÜ ---
+    function otomatikAyKontrolu() {
+        db.collection("settings").doc("config").get().then(function(doc) {
+            var now = new Date();
+            var currentMonthStr = now.getFullYear() + "-" + (now.getMonth() + 1); 
+            
+            if (!doc.exists) {
+                db.collection("settings").doc("config").set({ lastResetMonth: currentMonthStr });
+            } else {
+                var lastResetMonth = doc.data().lastResetMonth;
+                if (lastResetMonth !== currentMonthStr) {
+                    if(confirm("Yeni ay başladı! Liderlik tablosunu otomatik olarak sıfırlamak istiyor musunuz?")) {
+                        var batch = db.batch();
+                        db.collection("users").get().then(function(querySnapshot) {
+                            querySnapshot.forEach(function(userDoc) {
+                                batch.update(userDoc.ref, { taskCount: 0 });
+                            });
+                            return batch.commit();
+                        }).then(function() {
+                            db.collection("settings").doc("config").update({ lastResetMonth: currentMonthStr });
+                            alert("Yeni ay başladı ve görev sayıları sıfırlandı!");
+                            liderlikTablosunuYukle();
+                        });
+                    }
+                }
+            }
+        });
+    }
+
+    // --- İSTATİSTİKLER ---
     function istatistikleriYukle() {
         db.collection("users").get().then(function(snapshot) {
             document.getElementById('stat-total-users').innerText = snapshot.size;
@@ -301,6 +335,7 @@
         });
     }
 
+    // --- KULLANICILAR (Banlama ve Puan Ekleme) ---
     function kullanicilariYukle() {
         var list = document.getElementById('user-list');
         list.innerHTML = 'Yükleniyor...';
@@ -313,7 +348,7 @@
                 <div class="list-item">
                     <div class="item-info">
                         <h4>${user.email} ${banText}</h4>
-                        <span>Bakiye: ${user.balance} NC</span> | <span style="color:#4da6ff;">Skor: ${user.score || 0}</span>
+                        <span>Bakiye: ${user.balance} NC</span> | <span style="color:#4da6ff;">Görev: ${user.taskCount || 0}</span>
                     </div>
                     <div style="display:flex; gap:5px; flex-wrap:wrap;">
                         <button class="btn-add-nc" onclick="puanEkle('${doc.id}', '${user.email}')">💰 Puan Ekle/Çıkar</button>
@@ -331,25 +366,47 @@
             if (!isNaN(miktar)) {
                 db.collection("users").doc(uid).update({ balance: firebase.firestore.FieldValue.increment(miktar) })
                 .then(function() { alert("İşlem Başarılı!"); kullanicilariYukle(); istatistikleriYukle(); });
-            } else { alert("Geçerli bir sayı girin."); }
+            }
         }
     }
 
     window.kullaniciBanla = function(uid, mevcutDurum) {
         var yeniDurum = !mevcutDurum;
-        if (confirm("Bu kullanıcının durumunu değiştirmek istiyor musunuz?")) {
+        if (confirm("Kullanıcının durumunu değiştirmek istiyor musunuz?")) {
             db.collection("users").doc(uid).update({ isBanned: yeniDurum })
             .then(function() { alert("İşlem Başarılı!"); kullanicilariYukle(); });
         }
     }
 
-    // --- LİDERLİK TABLOSU İŞLEMLERİ ---
+    // --- DESTEK TALEPLERİ ---
+    function destekTalepleriniYukle() {
+        var list = document.getElementById('ticket-list');
+        list.innerHTML = 'Yükleniyor...';
+        db.collection("tickets").where("status", "==", "open").get().then(function(querySnapshot) {
+            list.innerHTML = querySnapshot.empty ? 'Bekleyen talep yok.' : '';
+            querySnapshot.forEach(function(doc) {
+                var ticket = doc.data();
+                list.innerHTML += `
+                <div class="list-item ticket-item" style="flex-direction: column; align-items: flex-start;">
+                    <div class="item-info" style="width:100%; margin-bottom: 10px;"><h4 style="color:#4da6ff;">${ticket.userEmail}</h4><p style="margin-top:5px; color:white;">"${ticket.message}"</p></div>
+                    <button class="btn-approve" style="flex:none; width:auto; padding:8px 15px;" onclick="talebiKapat('${doc.id}')">✅ Kapat</button>
+                </div>`;
+            });
+        });
+    }
+
+    window.talebiKapat = function(ticketId) {
+        if (confirm("Talebi kapatmak istiyor musunuz?")) {
+            db.collection("tickets").doc(ticketId).update({ status: "closed" }).then(function() { destekTalepleriniYukle(); });
+        }
+    }
+
+    // --- LİDERLİK TABLOSU (Admin Görünümü - Görev Sayısına Göre) ---
     function liderlikTablosunuYukle() {
         var list = document.getElementById('leaderboard-list');
         list.innerHTML = 'Sıralama yükleniyor...';
         
-        // Skora göre büyükten küçüğe sırala ve ilk 100'ü al
-        db.collection("users").orderBy("score", "desc").limit(100).get().then(function(querySnapshot) {
+        db.collection("users").orderBy("taskCount", "desc").limit(100).get().then(function(querySnapshot) {
             list.innerHTML = '';
             if (querySnapshot.empty) {
                 list.innerHTML = '<p style="color:#aaa;">Henüz sıralama oluşmadı.</p>';
@@ -366,16 +423,13 @@
                 else if (sira === 2) { rankClass = "rank-2"; medal = "🥈"; }
                 else if (sira === 3) { rankClass = "rank-3"; medal = "🥉"; }
                 
-                var rewardBtn = "";
-                if (sira <= 3) {
-                    rewardBtn = `<button class="btn-add-nc" onclick="odulVer('${user.email}')">🎁 Ödül Ver</button>`;
-                }
+                var rewardBtn = (sira <= 3) ? `<button class="btn-add-nc" onclick="odulVer('${user.email}')">🎁 Ödül Ver</button>` : "";
 
                 list.innerHTML += `
                 <div class="list-item leaderboard-item ${rankClass}">
                     <div class="item-info">
                         <h4>${medal} ${sira}. ${user.email}</h4>
-                        <span style="color:#ffcc00;">Skor: ${user.score || 0}</span>
+                        <span style="color:#ffcc00;">Görev Sayısı: ${user.taskCount || 0}</span>
                     </div>
                     ${rewardBtn}
                 </div>`;
@@ -385,26 +439,25 @@
     }
 
     window.odulVer = function(email) {
-        alert(email + " kullanıcısına ödül vermek için mağaza veya manuel puan ekleme sistemini kullanabilirsiniz.\n\nİleride buraya 'Play Store Kodu Gönder' butonu ekleyeceğiz.");
+        alert(email + " kullanıcısına ödül vermek için 'Kullanıcılar' sekmesinden manuel puan ekleyebilirsiniz.");
     }
 
     window.skorlariSifirla = function() {
-        if (confirm("DİKKAT! Tüm kullanıcıların skorları SIFIRLANACAK. Bakiyeleri (NC) silinmeyecek. Emin misiniz?")) {
+        if (confirm("DİKKAT! Tüm kullanıcıların görev sayıları SIFIRLANACAK. Bakiyeler silinmeyecek. Emin misiniz?")) {
             db.collection("users").get().then(function(querySnapshot) {
                 var batch = db.batch();
-                querySnapshot.forEach(function(doc) {
-                    batch.update(doc.ref, { score: 0 });
-                });
+                querySnapshot.forEach(function(doc) { batch.update(doc.ref, { taskCount: 0 }); });
                 return batch.commit();
             }).then(function() {
-                alert("Yeni ay başlatıldı, tüm skorlar sıfırlandı!");
+                alert("Yeni ay başlatıldı, tüm görev sayıları sıfırlandı!");
+                var now = new Date();
+                var currentMonthStr = now.getFullYear() + "-" + (now.getMonth() + 1);
+                db.collection("settings").doc("config").set({ lastResetMonth: currentMonthStr });
                 liderlikTablosunuYukle();
-            }).catch(function(error) {
-                alert("Hata: " + error.message);
             });
         }
     }
-           // --- GÖREV İŞLEMLERİ ---
+            // --- GÖREV İŞLEMLERİ ---
         function gorevEkle() {
             var title = document.getElementById('task-title').value;
             var url = document.getElementById('task-url').value;
@@ -482,7 +535,7 @@
             .catch(function(error) { alert("Hata: " + error.message); });
         }
 
-        // --- KANIT ONAY İŞLEMLERİ (Hem Bakiye Hem Skor Artırır) ---
+        // --- KANIT ONAY İŞLEMLERİ (Bakiye + Görev Sayısı Artışı) ---
         function kanitlariYukle() {
             var list = document.getElementById('proof-list');
             list.innerHTML = 'Yükleniyor...';
@@ -535,12 +588,12 @@
                                 db.collection("users").where("email", "==", userEmail).get().then(function(querySnapshot) {
                                     if (!querySnapshot.empty) {
                                         var userDocId = querySnapshot.docs[0].id;
-                                        // Hem bakiyeye (balance) hem skora (score) ekle
+                                        // HEM BAKİYE HEM GÖREV SAYISI ARTIRILIYOR
                                         db.collection("users").doc(userDocId).update({ 
                                             balance: firebase.firestore.FieldValue.increment(rewardAmount),
-                                            score: firebase.firestore.FieldValue.increment(rewardAmount)
+                                            taskCount: firebase.firestore.FieldValue.increment(1)
                                         }).then(function() {
-                                            alert("Onaylandı! " + rewardAmount + " NC yatırıldı ve skora eklendi.");
+                                            alert("Onaylandı! " + rewardAmount + " NC yatırıldı ve görev sayısı arttı.");
                                             kanitlariYukle();
                                             istatistikleriYukle();
                                         });
@@ -613,29 +666,6 @@
             }
         }
 
-        // --- DESTEK TALEPLERİ İŞLEMLERİ ---
-        function destekTalepleriniYukle() {
-            var list = document.getElementById('ticket-list');
-            list.innerHTML = 'Yükleniyor...';
-            db.collection("tickets").where("status", "==", "open").get().then(function(querySnapshot) {
-                list.innerHTML = querySnapshot.empty ? 'Bekleyen talep yok.' : '';
-                querySnapshot.forEach(function(doc) {
-                    var ticket = doc.data();
-                    list.innerHTML += `
-                    <div class="list-item ticket-item" style="flex-direction: column; align-items: flex-start;">
-                        <div class="item-info" style="width:100%; margin-bottom: 10px;"><h4 style="color:#4da6ff;">${ticket.userEmail}</h4><p style="margin-top:5px; color:white;">"${ticket.message}"</p></div>
-                        <button class="btn-approve" style="flex:none; width:auto; padding:8px 15px;" onclick="talebiKapat('${doc.id}')">✅ Kapat</button>
-                    </div>`;
-                });
-            });
-        }
-
-        window.talebiKapat = function(ticketId) {
-            if (confirm("Talebi kapatmak istiyor musunuz?")) {
-                db.collection("tickets").doc(ticketId).update({ status: "closed" }).then(function() { destekTalepleriniYukle(); });
-            }
-        }
-
         // --- ORTAK SİLME ---
         function sil(collectionName, id) {
             if(confirm("Silmek istediğinize emin misiniz?")) {
@@ -648,4 +678,4 @@
         }
     </script>
 </body>
-</html> 
+</html>
