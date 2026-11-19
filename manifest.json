@@ -7,14 +7,10 @@
   "theme_color": "#ffcc00",
   "icons": [
     {
-      "src": "https://github.com/ahmetcelil50-beep.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "https://github.com/ahmetcelil50-beep.png",
+      "src": "icon.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
