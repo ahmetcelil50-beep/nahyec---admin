@@ -1,0 +1,20 @@
+{
+  "name": "Nahyec - Kazanmaya Başla",
+  "short_name": "Nahyec",
+  "start_url": "/nahyec---admin/user.html",
+  "display": "standalone",
+  "background_color": "#f4f6f9",
+  "theme_color": "#ffcc00",
+  "icons": [
+    {
+      "src": "https://github.com/ahmetcelil50-beep.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://github.com/ahmetcelil50-beep.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
