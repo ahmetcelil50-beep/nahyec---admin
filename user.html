@@ -691,5 +691,10 @@ function zamanFarkiHesapla(timestamp) {
             }
         }
     </script>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/nahyec---admin/service-worker.js');
+  }
+</script>
 </body>
 </html>
